@@ -27,17 +27,26 @@ fn main() {
         }
     };
 
+    if input.trim().is_empty() {
+        eprintln!("Error: Input file is empty");
+        std::process::exit(1);
+    }
+
     match parse_datalog(&input) {
         Ok((_, items)) => {
-            println!("Parsed items:");
-            for rel in items {
-                match rel {
-                    dataloglite::DatalogItem::Fact(rel) => println!("{} is {}", rel.name, rel.first),
-                    dataloglite::DatalogItem::Relation(rel) => println!("{} is {} of {}", rel.name, rel.first, rel.second),
-                    dataloglite::DatalogItem::Rule(rel) => println!("{} of {}, {} means TODO", rel.name, rel.first, rel.second),
+            if items.is_empty() {
+                println!("No valid datalog items found");
+            } else {
+                println!("Parsed items:");
+                for rel in items {
+                    match rel {
+                        dataloglite::DatalogItem::Fact(rel) => println!("{} is {}", rel.name, rel.first),
+                        dataloglite::DatalogItem::Relation(rel) => println!("{} is {} of {}", rel.name, rel.first, rel.second),
+                        dataloglite::DatalogItem::Rule(rel) => println!("{} of {}, {} means TODO", rel.name, rel.first, rel.second),
+                    }
                 }
             }
         }
-        Err(e) => println!("Error parsing: {:?}", e),
+        Err(e) => eprintln!("Error parsing datalog: {}", e),
     }
 }
