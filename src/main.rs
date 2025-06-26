@@ -4,7 +4,8 @@ use nom::{
     combinator::map,
     multi::many1,
     sequence::{delimited, separated_pair, terminated},
-    IResult, Parser,
+    IResult,
+    Parser as NomParser,  // Renamed this import
 };
 
 #[derive(Debug)]
@@ -39,16 +40,21 @@ fn parse_datalog(input: &str) -> IResult<&str, Vec<ParentRelation>> {
     many1(terminated(parse_parent_relation, space0)).parse(input)
 }
 
-use std::{env, fs};
+use std::{fs};
+use clap::Parser;  // Now this is the only Parser in scope
+
+/// Simple program to parse datalog files
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Input file to parse
+    input_file: String,
+}
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Usage: {} <input_file>", args[0]);
-        std::process::exit(1);
-    }
+    let args = Args::parse();
 
-    let input = match fs::read_to_string(&args[1]) {
+    let input = match fs::read_to_string(&args.input_file) {
         Ok(content) => content,
         Err(e) => {
             eprintln!("Error reading file: {}", e);
