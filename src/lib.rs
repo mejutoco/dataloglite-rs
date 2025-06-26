@@ -1,7 +1,7 @@
 use nom::{
-    bytes::complete::tag,
+    bytes::complete::{tag},
     character::complete::{alpha1, char, space0},
-    combinator::map,
+    combinator::{map},
     multi::many1,
     sequence::{delimited, separated_pair, terminated},
     IResult,
