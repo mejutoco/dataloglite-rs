@@ -51,13 +51,44 @@ fn test_parse_fact() {
 
 #[test]
 fn test_parse_rule_definition() {
-    let input = r#"parent(X, Y), male(X)."#;
+    let input = r#"parent(X, Y), male(X)"#;
     let (remaining, rule_definition) = parse_rule_definition(input).unwrap();
     assert_eq!(remaining, "");
-    match rule_definition {
-        RuleDefinition { relations: el } => {
-            assert_eq!(el.len(), 2);
-            match &el[0] {
+    assert_eq!(rule_definition.relations.len(), 2);
+    match &rule_definition.relations[0] {
+        DatalogItem::Relation(rel) => {
+            assert_eq!(rel.name, "parent");
+            assert_eq!(rel.first, "X");
+            assert_eq!(rel.second, "Y");
+        }
+        _ => panic!("Expected Relation"),
+    };
+    match &rule_definition.relations[1] {
+        DatalogItem::Fact(rel) => {
+            assert_eq!(rel.name, "male");
+            assert_eq!(rel.first, "X");
+        }
+        _ => panic!("Expected Fact"),
+    };
+}
+
+#[test]
+fn test_parse_rule() {
+    let input = r#"father(X, Y) :- parent(X, Y), male(X)."#;
+    let (remaining, items) = parse_datalog(input).unwrap();
+    assert_eq!(remaining, "");
+    match &items[0] {
+        DatalogItem::Rule(el) => {
+            assert_eq!(el.name, "father");
+            assert_eq!(el.first, "X");
+            assert_eq!(el.second, "Y");
+            assert_eq!(el.definition.relations.len(), 2);
+            match &el.definition {
+                RuleDefinition { relations } => {
+                    assert_eq!(relations.len(), 2);
+                }
+            }
+            match &el.definition.relations[0] {
                 DatalogItem::Relation(rel) => {
                     assert_eq!(rel.name, "parent");
                     assert_eq!(rel.first, "X");
@@ -65,7 +96,7 @@ fn test_parse_rule_definition() {
                 }
                 _ => panic!("Expected Relation"),
             };
-            match &el[1] {
+            match &el.definition.relations[1] {
                 DatalogItem::Fact(rel) => {
                     assert_eq!(rel.name, "male");
                     assert_eq!(rel.first, "X");
@@ -73,25 +104,6 @@ fn test_parse_rule_definition() {
                 _ => panic!("Expected Fact"),
             };
         }
-        _ => panic!("Expected RuleDefinition"),
-    }
+        _ => panic!("Expected Fact variant"),
+    };
 }
-
-// #[test]
-// fn test_parse_rule() {
-//     let input = r#"father(X, Y) :- parent(X, Y), male(X)."#;
-//     let (remaining, items) = parse_datalog(input).unwrap();
-//     assert_eq!(remaining, "");
-//     match &items[0] {
-//         DatalogItem::Rule(el) => {
-//             assert_eq!(el.name, "father");
-//             assert_eq!(el.first, "X");
-//             assert_eq!(el.second, "Y");
-//             assert_eq!(el.relations.len(), 2);
-//             assert_eq!(el.relations[0].name, "parent");
-//             assert_eq!(el.relations[0].first, "X");
-//             assert_eq!(el.relations[0].second, "Y");
-//         }
-//         _ => panic!("Expected Fact variant"),
-//     }
-// }

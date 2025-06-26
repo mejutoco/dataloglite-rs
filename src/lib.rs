@@ -37,12 +37,6 @@ pub struct Rule {
 }
 
 #[derive(Debug)]
-enum RelationOrFact {
-    Relation(DatalogItem),
-    Fact(DatalogItem),
-}
-
-#[derive(Debug)]
 pub struct RuleDefinition {
     pub relations: Vec<DatalogItem>,
 }
@@ -110,26 +104,46 @@ pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
 }
 
 pub fn parse_relation_or_fact(input: &str) -> IResult<&str, DatalogItem> {
-    let (input, item) = alt((
-        map(parse_relation, DatalogItem::Relation),
-        map(parse_fact, DatalogItem::Fact),
+    alt((
+        map(parse_relation_with_vars, DatalogItem::Relation),
+        map(parse_fact_with_var, DatalogItem::Fact),
     ))
-    .parse(input)?;
+    .parse(input)
+}
 
-    match item {
-        DatalogItem::Relation(rel) => Ok((input, DatalogItem::Relation(rel))),
-        DatalogItem::Fact(fact) => Ok((input, DatalogItem::Fact(fact))),
-        _ => Err(nom::Err::Error(nom::error::Error::new(
-            input,
-            nom::error::ErrorKind::Fail,
-        ))),
-    }
+pub fn parse_relation_with_vars(input: &str) -> IResult<&str, Relation> {
+    let (input, name) = parse_name(input)?;
+    let (input, _) = char('(')(input)?;
+    let (input, (first, second)) = separated_pair(
+        parse_argument,
+        terminated(char(','), space0),
+        parse_argument,
+    )
+    .parse(input)?;
+    let (input, _) = char(')')(input)?;
+
+    Ok((
+        input,
+        Relation {
+            name,
+            first,
+            second,
+        },
+    ))
+}
+
+pub fn parse_fact_with_var(input: &str) -> IResult<&str, Fact> {
+    let (input, name) = parse_name(input)?;
+    let (input, _) = char('(')(input)?;
+    let (input, first) = parse_argument(input)?;
+    let (input, _) = char(')')(input)?;
+
+    Ok((input, Fact { name, first }))
 }
 
 pub fn parse_rule_definition(input: &str) -> IResult<&str, RuleDefinition> {
     let (input, relations) =
         separated_list1(terminated(char(','), space0), parse_relation_or_fact).parse(input)?;
-    let (input, _) = char('.')(input)?;
 
     Ok((input, RuleDefinition { relations }))
 }
@@ -142,11 +156,8 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
     let (input, second) = parse_argument(input)?;
     let (input, _) = char(')')(input)?;
     let (input, _) = delimited(space0, tag(":-"), space0).parse(input)?;
-    // let (input, relations) =
-    //     separated_list1(terminated(char(','), space0), parse_relation).parse(input)?;
-    // let (input, _) = char('.')(input)?;
-    // use parse_rule_definition to parse the relations
-    let (input, relations) = parse_rule_definition(input)?;
+    let (input, definition) = parse_rule_definition(input)?;
+    let (input, _) = char('.')(input)?;
 
     Ok((
         input,
@@ -154,7 +165,7 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
             name,
             first,
             second,
-            definition: relations,
+            definition,
         },
     ))
 }
