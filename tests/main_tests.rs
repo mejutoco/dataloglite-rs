@@ -77,33 +77,31 @@ fn test_parse_rule() {
     let input = r#"father(X, Y) :- parent(X, Y), male(X)."#;
     let (remaining, items) = parse_datalog(input).unwrap();
     assert_eq!(remaining, "");
-    match &items[0] {
-        DatalogItem::Rule(el) => {
-            assert_eq!(el.name, "father");
-            assert_eq!(el.first, "X");
-            assert_eq!(el.second, "Y");
-            assert_eq!(el.definition.relations.len(), 2);
-            match &el.definition {
-                RuleDefinition { relations } => {
-                    assert_eq!(relations.len(), 2);
-                }
-            }
-            match &el.definition.relations[0] {
-                DatalogItem::Relation(rel) => {
-                    assert_eq!(rel.name, "parent");
-                    assert_eq!(rel.first, "X");
-                    assert_eq!(rel.second, "Y");
-                }
-                _ => panic!("Expected Relation"),
-            };
-            match &el.definition.relations[1] {
-                DatalogItem::Fact(rel) => {
-                    assert_eq!(rel.name, "male");
-                    assert_eq!(rel.first, "X");
-                }
-                _ => panic!("Expected Fact"),
-            };
-        }
-        _ => panic!("Expected Fact variant"),
+
+    let DatalogItem::Rule(el) = &items[0] else {
+        panic!("Expected Rule variant");
     };
+
+    assert_eq!(el.name, "father");
+    assert_eq!(el.first, "X");
+    assert_eq!(el.second, "Y");
+    assert_eq!(el.definition.relations.len(), 2);
+
+    let RuleDefinition { relations } = &el.definition;
+    assert_eq!(relations.len(), 2);
+
+    // Check first relation
+    let DatalogItem::Relation(rel) = &relations[0] else {
+        panic!("Expected Relation");
+    };
+    assert_eq!(rel.name, "parent");
+    assert_eq!(rel.first, "X");
+    assert_eq!(rel.second, "Y");
+
+    // Check second relation
+    let DatalogItem::Fact(rel) = &relations[1] else {
+        panic!("Expected Fact");
+    };
+    assert_eq!(rel.name, "male");
+    assert_eq!(rel.first, "X");
 }
