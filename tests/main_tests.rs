@@ -63,7 +63,7 @@ fn test_parse_rule_definition() {
             assert_eq!(el[1].name, "male");
             assert_eq!(el[1].first, "X");
         }
-        _ => panic!("Expected Fact variant"),
+        _ => panic!("Expected RuleDefinition"),
     }
 }
 

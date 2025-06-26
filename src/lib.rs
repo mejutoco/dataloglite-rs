@@ -37,8 +37,14 @@ pub struct Rule {
 }
 
 #[derive(Debug)]
+enum RelationOrFact {
+    Relation(DatalogItem),
+    Fact(DatalogItem),
+}
+
+#[derive(Debug)]
 pub struct RuleDefinition {
-    pub relations: Vec<Relation>,
+    pub relations: Vec<RelationOrFact>,
 }
 
 pub fn parse_quoted_string(input: &str) -> IResult<&str, String> {
@@ -103,9 +109,26 @@ pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
     Ok((input, Fact { name, first }))
 }
 
+pub fn parse_relation_or_fact(input: &str) -> IResult<&str, RelationOrFact> {
+    let (input, item) = alt((
+        map(parse_relation, DatalogItem::Relation),
+        map(parse_fact, DatalogItem::Fact),
+    ))
+    .parse(input)?;
+
+    match item {
+        DatalogItem::Relation(rel) => Ok((input, RelationOrFact::Relation(rel))),
+        DatalogItem::Fact(fact) => Ok((input, DatalogItem::Fact(fact))),
+        _ => Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Fail,
+        ))),
+    }
+}
+
 pub fn parse_rule_definition(input: &str) -> IResult<&str, RuleDefinition> {
     let (input, relations) =
-        separated_list1(terminated(char(','), space0), parse_relation).parse(input)?;
+        separated_list1(terminated(char(','), space0), parse_relation_or_fact).parse(input)?;
     let (input, _) = char('.')(input)?;
 
     Ok((input, RuleDefinition { relations }))
