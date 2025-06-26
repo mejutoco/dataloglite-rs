@@ -2,4 +2,4 @@
 
 ### TODO:
 
-- create a linter
+- create a formatter
