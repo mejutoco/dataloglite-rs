@@ -1,10 +1,14 @@
+/* Base facts: Parent-Child relationships */
 parent("Alice", "Bob").
 parent("Alice", "Barbara").
 parent("Bob", "Charlie").
 parent("Bob", "Cindy").
 parent("Barbara", "David").
+// One more comment
 parent("Barbara", "Diana").
 parent("Charlie", "Eve").
 parent("Cindy", "Frank").
 parent("David", "Grace").
 parent("Diana", "Henry").
+
+/* Rules for basic relationships */
