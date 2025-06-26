@@ -1,4 +1,3 @@
-/* Base facts: Parent-Child relationships */
 parent("Alice", "Bob").
 parent("Alice", "Barbara").
 parent("Bob", "Charlie").
@@ -9,8 +8,3 @@ parent("Charlie", "Eve").
 parent("Cindy", "Frank").
 parent("David", "Grace").
 parent("Diana", "Henry").
-
-/* Rules for basic relationships */
-
-// X is a father of Y if X is male and parent of Y
-//father(X, Y) :- parent(X, Y), male(X).
