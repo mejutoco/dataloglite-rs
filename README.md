@@ -2,6 +2,8 @@
 
 ### TODO:
 
+- Parse cousins_full.datalog
+- Implement queries
 - create a formatter
   - canonical order for
     - facts
