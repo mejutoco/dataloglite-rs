@@ -57,11 +57,21 @@ fn test_parse_rule_definition() {
     match rule_definition {
         RuleDefinition { relations: el } => {
             assert_eq!(el.len(), 2);
-            assert_eq!(el[0].name, "father");
-            assert_eq!(el[0].first, "X");
-            assert_eq!(el[0].second, "Y");
-            assert_eq!(el[1].name, "male");
-            assert_eq!(el[1].first, "X");
+            match &el[0] {
+                DatalogItem::Relation(rel) => {
+                    assert_eq!(rel.name, "parent");
+                    assert_eq!(rel.first, "X");
+                    assert_eq!(rel.second, "Y");
+                }
+                _ => panic!("Expected Relation"),
+            };
+            match &el[1] {
+                DatalogItem::Fact(rel) => {
+                    assert_eq!(rel.name, "male");
+                    assert_eq!(rel.first, "X");
+                }
+                _ => panic!("Expected Fact"),
+            };
         }
         _ => panic!("Expected RuleDefinition"),
     }
