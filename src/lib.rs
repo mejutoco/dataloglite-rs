@@ -1,5 +1,4 @@
 use nom::{
-    bytes::complete::tag,
     character::complete::{alpha1, char, space0},
     combinator::{map, recognize},
     multi::many1,
@@ -11,8 +10,8 @@ use nom::{
 #[derive(Debug)]
 pub struct Relation {
     pub relationship: String,
-    pub parent: String,
-    pub child: String,
+    pub first: String,
+    pub second: String,
 }
 
 pub fn parse_quoted_string(input: &str) -> IResult<&str, String> {
@@ -38,7 +37,7 @@ pub fn parse_relationship_name(input: &str) -> IResult<&str, String> {
 pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
     let (input, relationship) = parse_relationship_name(input)?;
     let (input, _) = char('(')(input)?;
-    let (input, (parent, child)) = separated_pair(
+    let (input, (first, second)) = separated_pair(
         parse_quoted_string,
         terminated(char(','), space0),
         parse_quoted_string,
@@ -46,7 +45,7 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
     let (input, _) = char(')')(input)?;
     let (input, _) = char('.')(input)?;
 
-    Ok((input, Relation { relationship, parent, child }))
+    Ok((input, Relation { relationship, first, second }))
 }
 
 pub fn parse_datalog(input: &str) -> IResult<&str, Vec<Relation>> {

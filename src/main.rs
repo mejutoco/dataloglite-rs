@@ -31,7 +31,7 @@ fn main() {
         Ok((_, relations)) => {
             println!("Parsed relations:");
             for rel in relations {
-                println!("{} is parent of {}", rel.parent, rel.child);
+                println!("{} is parent of {}", rel.first, rel.second);
             }
         }
         Err(e) => println!("Error parsing: {:?}", e),

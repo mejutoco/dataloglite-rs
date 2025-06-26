@@ -11,9 +11,9 @@ fn test_example_datalog() {
     assert_eq!(relations.len(), 10);
     
     // Test some sample relations
-    assert!(relations.iter().any(|r| r.parent == "Alice" && r.child == "Bob"));
-    assert!(relations.iter().any(|r| r.parent == "Bob" && r.child == "Charlie"));
-    assert!(relations.iter().any(|r| r.parent == "Diana" && r.child == "Henry"));
+    assert!(relations.iter().any(|r| r.first == "Alice" && r.second == "Bob"));
+    assert!(relations.iter().any(|r| r.first == "Bob" && r.second == "Charlie"));
+    assert!(relations.iter().any(|r| r.first == "Diana" && r.second == "Henry"));
 }
 
 #[test]
@@ -33,11 +33,11 @@ fn test_cousins_facts_rules() {
     assert_eq!(relations.len(), 10);
     
     // Verify some parent relations
-    assert!(relations.iter().any(|r| r.parent == "Alice" && r.child == "Bob"));
-    assert!(relations.iter().any(|r| r.parent == "Alice" && r.child == "Barbara"));
-    assert!(relations.iter().any(|r| r.parent == "Diana" && r.child == "Henry"));
+    assert!(relations.iter().any(|r| r.first == "Alice" && r.second == "Bob"));
+    assert!(relations.iter().any(|r| r.first == "Alice" && r.second == "Barbara"));
+    assert!(relations.iter().any(|r| r.first == "Diana" && r.second == "Henry"));
     
     // Verify we didn't parse rules or comments
-    assert!(!relations.iter().any(|r| r.parent == "father(X, Y)"));
-    assert!(!relations.iter().any(|r| r.parent == "cousin(X, Y)"));
+    assert!(!relations.iter().any(|r| r.first == "father(X, Y)"));
+    assert!(!relations.iter().any(|r| r.first == "cousin(X, Y)"));
 }

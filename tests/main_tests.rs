@@ -6,8 +6,8 @@ fn test_parse_single_relation() {
     let (remaining, relation) = parse_relation(input).unwrap();
     assert_eq!(remaining, "");
     assert_eq!(relation.relationship, "parent");
-    assert_eq!(relation.parent, "Alice");
-    assert_eq!(relation.child, "Bob");
+    assert_eq!(relation.first, "Alice");
+    assert_eq!(relation.second, "Bob");
 }
 
 #[test]
@@ -17,9 +17,9 @@ fn test_parse_multiple_relations() {
     assert_eq!(remaining, "");
     assert_eq!(relations.len(), 2);
     assert_eq!(relations[0].relationship, "parent");
-    assert_eq!(relations[0].parent, "A");
-    assert_eq!(relations[0].child, "B");
+    assert_eq!(relations[0].first, "A");
+    assert_eq!(relations[0].second, "B");
     assert_eq!(relations[1].relationship, "mother");
-    assert_eq!(relations[1].parent, "B");
-    assert_eq!(relations[1].child, "C");
+    assert_eq!(relations[1].first, "B");
+    assert_eq!(relations[1].second, "C");
 }
