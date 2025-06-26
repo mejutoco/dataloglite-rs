@@ -1,11 +1,12 @@
 use dataloglite::{parse_datalog, parse_relation};
+use dataloglite::DatalogItem;
 
 #[test]
 fn test_parse_single_relation() {
     let input = r#"parent("Alice", "Bob")."#;
     let (remaining, relation) = parse_relation(input).unwrap();
     assert_eq!(remaining, "");
-    assert_eq!(relation.relationship, "parent");
+    assert_eq!(relation.name, "parent");
     assert_eq!(relation.first, "Alice");
     assert_eq!(relation.second, "Bob");
 }
@@ -16,21 +17,36 @@ fn test_parse_multiple_relations() {
     let (remaining, relations) = parse_datalog(input).unwrap();
     assert_eq!(remaining, "");
     assert_eq!(relations.len(), 2);
-    assert_eq!(relations[0].relationship, "parent");
-    assert_eq!(relations[0].first, "A");
-    assert_eq!(relations[0].second, "B");
-    assert_eq!(relations[1].relationship, "mother");
-    assert_eq!(relations[1].first, "B");
-    assert_eq!(relations[1].second, "C");
+    match &relations[0] {
+        DatalogItem::Relation(rel) => {
+            assert_eq!(rel.name, "parent");
+            assert_eq!(rel.first, "A");
+            assert_eq!(rel.second, "B");
+        }
+        _ => panic!("Expected Relation variant"),
+    }
+    match &relations[1] {
+        DatalogItem::Relation(rel) => {
+            assert_eq!(rel.name, "mother");
+            assert_eq!(rel.first, "B");
+            assert_eq!(rel.second, "C");
+        }
+        _ => panic!("Expected Relation variant"),
+    }
 }
 
 #[test]
 fn test_parse_fact() {
-    let input r#"male(X)."#;
+    let input = r#"male(X)."#;
     let (remaining, fact) = parse_datalog(input).unwrap();
     assert_eq!(remaining, "");
-    assert_eq!(fact.name, "male");
-    assert_eq!(fact.first, "X");
+    match &fact[0] {
+        DatalogItem::Fact(f) => {
+            assert_eq!(f.name, "male");
+            assert_eq!(f.first, "X");
+        }
+        _ => panic!("Expected Fact variant"),
+    }
 }
 
 // #[test]
@@ -42,7 +58,7 @@ fn test_parse_fact() {
 //     assert_eq!(rule.first, "X");
 //     assert_eq!(rule.second, "Y");
 //     assert_eq!(rule.relations.len(), 2);
-//     assert_eq!(rule.relations[0].relationship, "parent");
+//     assert_eq!(rule.relations[0].name, "parent");
 //     assert_eq!(rule.relations[0].first, "X");
 //     assert_eq!(rule.relations[0].second, "Y");
 // }

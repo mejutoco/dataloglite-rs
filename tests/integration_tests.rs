@@ -11,9 +11,12 @@ fn test_example_datalog() {
     assert_eq!(relations.len(), 10);
     
     // Test some sample relations
-    assert!(relations.iter().any(|r| match r {
-        DatalogItem::Relation(rel) => rel.first == "Alice" && rel.second == "Bob",
-        _ => false,
+    assert!(relations.iter().any(|r| {
+        if let DatalogItem::Relation(rel) = r {
+            rel.first == "Alice" && rel.second == "Bob"
+        } else {
+            false
+        }
     }));
     assert!(relations.iter().any(|r| match r {
         DatalogItem::Relation(rel) => rel.first == "Bob" && rel.second == "Charlie",

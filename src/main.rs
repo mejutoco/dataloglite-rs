@@ -28,10 +28,14 @@ fn main() {
     };
 
     match parse_datalog(&input) {
-        Ok((_, relations)) => {
-            println!("Parsed relations:");
-            for rel in relations {
-                println!("{} is parent of {}", rel.first, rel.second);
+        Ok((_, items)) => {
+            println!("Parsed items:");
+            for rel in items {
+                match rel {
+                    dataloglite::DatalogItem::Fact(rel) => println!("{} is {}", rel.name, rel.first),
+                    dataloglite::DatalogItem::Relation(rel) => println!("{} is {} of {}", rel.name, rel.first, rel.second),
+                    dataloglite::DatalogItem::Rule(rel) => println!("{} of {}, {} means TODO", rel.name, rel.first, rel.second),
+                }
             }
         }
         Err(e) => println!("Error parsing: {:?}", e),

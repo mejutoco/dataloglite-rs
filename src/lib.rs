@@ -24,7 +24,7 @@ pub enum DatalogItem {
 
 #[derive(Debug)]
 pub struct Relation {
-    pub relationship: String,
+    pub name: String,
     pub first: String,
     pub second: String,
 }
@@ -64,7 +64,7 @@ pub fn parse_argument(input: &str) -> IResult<&str, String> {
     )).parse(input)
 }
 
-pub fn parse_relationship_name(input: &str) -> IResult<&str, String> {
+pub fn parse_name(input: &str) -> IResult<&str, String> {
     map(
         recognize(
             preceded(
@@ -77,7 +77,7 @@ pub fn parse_relationship_name(input: &str) -> IResult<&str, String> {
 }
 
 pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
-    let (input, relationship) = parse_relationship_name(input)?;
+    let (input, name) = parse_name(input)?;
     let (input, _) = char('(')(input)?;
     let (input, (first, second)) = separated_pair(
         parse_quoted_string,
@@ -87,11 +87,11 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
     let (input, _) = char(')')(input)?;
     let (input, _) = char('.')(input)?;
 
-    Ok((input, Relation { relationship, first, second }))
+    Ok((input, Relation { name, first, second }))
 }
 
 pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
-    let (input, name) = parse_relationship_name(input)?;
+    let (input, name) = parse_name(input)?;
     let (input, _) = char('(')(input)?;
     let (input, first) = parse_argument(input)?;
     let (input, _) = char(')')(input)?;
@@ -101,7 +101,7 @@ pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
 }
 
 pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
-    let (input, name) = parse_relationship_name(input)?;
+    let (input, name) = parse_name(input)?;
     let (input, _) = char('(')(input)?;
     let (input, first) = parse_argument(input)?;
     let (input, _) = terminated(char(','), space0).parse(input)?;
