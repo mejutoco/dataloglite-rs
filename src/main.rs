@@ -39,19 +39,24 @@ fn parse_datalog(input: &str) -> IResult<&str, Vec<ParentRelation>> {
     many1(terminated(parse_parent_relation, space0)).parse(input)
 }
 
-fn main() {
-    let input = r#"parent("Alice", "Bob").
-parent("Alice", "Barbara").
-parent("Bob", "Charlie").
-parent("Bob", "Cindy").
-parent("Barbara", "David").
-parent("Barbara", "Diana").
-parent("Charlie", "Eve").
-parent("Cindy", "Frank").
-parent("David", "Grace").
-parent("Diana", "Henry")."#;
+use std::{env, fs};
 
-    match parse_datalog(input) {
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        eprintln!("Usage: {} <input_file>", args[0]);
+        std::process::exit(1);
+    }
+
+    let input = match fs::read_to_string(&args[1]) {
+        Ok(content) => content,
+        Err(e) => {
+            eprintln!("Error reading file: {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    match parse_datalog(&input) {
         Ok((_, relations)) => {
             println!("Parsed relations:");
             for rel in relations {
