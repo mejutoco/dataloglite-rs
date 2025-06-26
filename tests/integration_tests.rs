@@ -55,7 +55,7 @@ fn test_cousins_facts_rules() {
     let (remaining, items) = parse_datalog(&input).expect("Failed to parse");
 
     assert_eq!(remaining, "");
-    assert_eq!(items.len(), 11);
+    assert_eq!(items.len(), 12);
 
     // Verify some parent relations
     assert!(items.iter().any(|r| match r {
