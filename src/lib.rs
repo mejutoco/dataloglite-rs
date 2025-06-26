@@ -4,7 +4,7 @@ use nom::{
     character::complete::{alpha1, char, not_line_ending, space0},
     combinator::{map, recognize, value},
     multi::{many0, separated_list1},
-    sequence::{delimited, preceded, separated_pair, terminated},
+    sequence::{delimited, pair, preceded, separated_pair, terminated},
     IResult, Parser as NomParser,
 };
 
@@ -62,9 +62,12 @@ pub fn parse_argument(input: &str) -> IResult<&str, String> {
 
 pub fn parse_name(input: &str) -> IResult<&str, String> {
     map(
-        recognize(preceded(
+        recognize(pair(
             nom::character::complete::satisfy(|c| c.is_ascii_lowercase()),
-            nom::character::complete::alpha0,
+            many0(alt((
+                nom::character::complete::satisfy(|c| c.is_ascii_alphanumeric()),
+                nom::character::complete::char('_'),
+            ))),
         )),
         |s: &str| s.to_string(),
     )

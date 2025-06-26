@@ -13,7 +13,7 @@ parent("Diana", "Henry").
 /* Rules for basic relationships */
 
 // These people are their own fathers
-ownfather(X, Y) :- parent(X, Y), male(X), parent(Y, X).
+own_father(X, Y) :- parent(X, Y), male(X), parent(Y, X).
 
 // X is a father of Y if X is male and parent of Y
 father(X, Y) :- parent(X, Y), male(X).
