@@ -8,10 +8,24 @@ use nom::{
 };
 
 #[derive(Debug)]
+pub struct Fact {
+    pub name: String,
+    pub first: String,
+}
+
+#[derive(Debug)]
 pub struct Relation {
     pub relationship: String,
     pub first: String,
     pub second: String,
+}
+
+#[derive(Debug)]
+pub struct Rule {
+    pub name: String,
+    pub first: String,
+    pub second: String,
+    pub relations: Vec<Relation>,
 }
 
 pub fn parse_quoted_string(input: &str) -> IResult<&str, String> {
