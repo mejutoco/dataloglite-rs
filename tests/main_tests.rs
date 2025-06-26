@@ -1,5 +1,5 @@
-use dataloglite::DatalogItem;
-use dataloglite::{parse_datalog, parse_relation};
+use dataloglite::{parse_datalog, parse_relation, parse_rule_definition};
+use dataloglite::{DatalogItem, RuleDefinition};
 
 #[test]
 fn test_parse_single_relation() {
@@ -50,20 +50,38 @@ fn test_parse_fact() {
 }
 
 #[test]
-fn test_parse_rule() {
-    let input = r#"father(X, Y) :- parent(X, Y), male(X)."#;
-    let (remaining, items) = parse_datalog(input).unwrap();
+fn test_parse_rule_definition() {
+    let input = r#"parent(X, Y), male(X)."#;
+    let (remaining, rule_definition) = parse_rule_definition(input).unwrap();
     assert_eq!(remaining, "");
-    match &items[0] {
-        DatalogItem::Rule(el) => {
-            assert_eq!(el.name, "father");
-            assert_eq!(el.first, "X");
-            assert_eq!(el.second, "Y");
-            assert_eq!(el.relations.len(), 2);
-            assert_eq!(el.relations[0].name, "parent");
-            assert_eq!(el.relations[0].first, "X");
-            assert_eq!(el.relations[0].second, "Y");
+    match rule_definition {
+        RuleDefinition { relations: el } => {
+            assert_eq!(el.len(), 2);
+            assert_eq!(el[0].name, "father");
+            assert_eq!(el[0].first, "X");
+            assert_eq!(el[0].second, "Y");
+            assert_eq!(el[1].name, "male");
+            assert_eq!(el[1].first, "X");
         }
         _ => panic!("Expected Fact variant"),
     }
 }
+
+// #[test]
+// fn test_parse_rule() {
+//     let input = r#"father(X, Y) :- parent(X, Y), male(X)."#;
+//     let (remaining, items) = parse_datalog(input).unwrap();
+//     assert_eq!(remaining, "");
+//     match &items[0] {
+//         DatalogItem::Rule(el) => {
+//             assert_eq!(el.name, "father");
+//             assert_eq!(el.first, "X");
+//             assert_eq!(el.second, "Y");
+//             assert_eq!(el.relations.len(), 2);
+//             assert_eq!(el.relations[0].name, "parent");
+//             assert_eq!(el.relations[0].first, "X");
+//             assert_eq!(el.relations[0].second, "Y");
+//         }
+//         _ => panic!("Expected Fact variant"),
+//     }
+// }

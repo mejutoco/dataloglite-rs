@@ -33,6 +33,11 @@ pub struct Rule {
     pub name: String,
     pub first: String,
     pub second: String,
+    pub definition: RuleDefinition,
+}
+
+#[derive(Debug)]
+pub struct RuleDefinition {
     pub relations: Vec<Relation>,
 }
 
@@ -98,6 +103,14 @@ pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
     Ok((input, Fact { name, first }))
 }
 
+pub fn parse_rule_definition(input: &str) -> IResult<&str, RuleDefinition> {
+    let (input, relations) =
+        separated_list1(terminated(char(','), space0), parse_relation).parse(input)?;
+    let (input, _) = char('.')(input)?;
+
+    Ok((input, RuleDefinition { relations }))
+}
+
 pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
     let (input, name) = parse_name(input)?;
     let (input, _) = char('(')(input)?;
@@ -110,14 +123,15 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
         separated_list1(terminated(char(','), space0), parse_relation).parse(input)?;
     let (input, _) = char('.')(input)?;
 
-    // Ok((input, Rule { name, first, second, relations }))
     Ok((
         input,
         Rule {
             name,
             first,
             second,
-            relations,
+            definition: RuleDefinition {
+                relations: relations,
+            },
         },
     ))
 }
