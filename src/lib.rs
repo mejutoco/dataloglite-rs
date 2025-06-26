@@ -1,15 +1,16 @@
 use nom::{
-    bytes::complete::{tag},
+    bytes::complete::tag,
     character::complete::{alpha1, char, space0},
-    combinator::{map},
+    combinator::{map, recognize},
     multi::many1,
-    sequence::{delimited, separated_pair, terminated},
+    sequence::{delimited, preceded, separated_pair, terminated},
     IResult,
     Parser as NomParser,
 };
 
 #[derive(Debug)]
-pub struct ParentRelation {
+pub struct Relation {
+    pub relationship: String,
     pub parent: String,
     pub child: String,
 }
@@ -22,8 +23,20 @@ pub fn parse_quoted_string(input: &str) -> IResult<&str, String> {
     ).parse(input)
 }
 
-pub fn parse_parent_relation(input: &str) -> IResult<&str, ParentRelation> {
-    let (input, _) = tag("parent")(input)?;
+pub fn parse_relationship_name(input: &str) -> IResult<&str, String> {
+    map(
+        recognize(
+            preceded(
+                nom::character::complete::satisfy(|c| c.is_ascii_lowercase()),
+                nom::character::complete::alpha0
+            )
+        ),
+        |s: &str| s.to_string()
+    ).parse(input)
+}
+
+pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
+    let (input, relationship) = parse_relationship_name(input)?;
     let (input, _) = char('(')(input)?;
     let (input, (parent, child)) = separated_pair(
         parse_quoted_string,
@@ -33,13 +46,12 @@ pub fn parse_parent_relation(input: &str) -> IResult<&str, ParentRelation> {
     let (input, _) = char(')')(input)?;
     let (input, _) = char('.')(input)?;
 
-    Ok((input, ParentRelation { parent, child }))
+    Ok((input, Relation { relationship, parent, child }))
 }
 
-pub fn parse_datalog(input: &str) -> IResult<&str, Vec<ParentRelation>> {
+pub fn parse_datalog(input: &str) -> IResult<&str, Vec<Relation>> {
     many1(terminated(
-        parse_parent_relation,
-        // Consume both spaces and newlines after each relation
+        parse_relation,
         nom::character::complete::multispace0
     )).parse(input)
 }
