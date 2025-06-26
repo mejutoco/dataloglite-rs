@@ -3,7 +3,7 @@ use std::fs;
 
 #[test]
 fn test_example_datalog() {
-    let input = fs::read_to_string("example.datalog").expect("Failed to read test file");
+    let input = fs::read_to_string("test_examples/example.datalog").expect("Failed to read test file");
     let (remaining, relations) = parse_datalog(&input).expect("Failed to parse");
     
     // After parsing all relations, we should have nothing left (not even whitespace)
