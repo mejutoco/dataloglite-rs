@@ -1,8 +1,8 @@
 use nom::{
     branch::alt,
-    bytes::complete::tag,
-    character::complete::{alpha1, char, space0},
-    combinator::{map, recognize},
+    bytes::complete::{tag, take_until},
+    character::complete::{alpha1, char, not_line_ending, space0},
+    combinator::{map, recognize, value},
     multi::{many0, separated_list1},
     sequence::{delimited, preceded, separated_pair, terminated},
     IResult, Parser as NomParser,
@@ -179,10 +179,39 @@ pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
     .parse(input)
 }
 
+pub fn parse_line_comment(input: &str) -> IResult<&str, ()> {
+    value(
+        (), // Output is thrown away
+        (tag("//"), not_line_ending),
+    )
+    .parse(input)
+}
+
+pub fn parse_block_comment(input: &str) -> IResult<&str, ()> {
+    value(
+        (), // Output is thrown away
+        (tag("/*"), take_until("*/"), tag("*/")),
+    )
+    .parse(input)
+}
+
+pub fn parse_comment(input: &str) -> IResult<&str, ()> {
+    alt((parse_line_comment, parse_block_comment)).parse(input)
+}
+
 pub fn parse_datalog(input: &str) -> IResult<&str, Vec<DatalogItem>> {
+    let (input, _) = many0(alt((
+        value((), nom::character::complete::multispace1),
+        parse_comment,
+    )))
+    .parse(input)?;
+
     many0(terminated(
         parse_datalog_item,
-        nom::character::complete::multispace0,
+        many0(alt((
+            value((), nom::character::complete::multispace1),
+            parse_comment,
+        ))),
     ))
     .parse(input)
 }
