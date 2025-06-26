@@ -1,44 +1,4 @@
-use nom::{
-    bytes::complete::tag,
-    character::complete::{alpha1, char, space0},
-    combinator::map,
-    multi::many1,
-    sequence::{delimited, separated_pair, terminated},
-    IResult,
-    Parser as NomParser,  // Renamed this import
-};
-
-#[derive(Debug)]
-struct ParentRelation {
-    parent: String,
-    child: String,
-}
-
-fn parse_quoted_string(input: &str) -> IResult<&str, String> {
-    delimited(
-        char('"'),
-        map(alpha1, |s: &str| s.to_string()),
-        char('"'),
-    ).parse(input)
-}
-
-fn parse_parent_relation(input: &str) -> IResult<&str, ParentRelation> {
-    let (input, _) = tag("parent")(input)?;
-    let (input, _) = char('(')(input)?;
-    let (input, (parent, child)) = separated_pair(
-        parse_quoted_string,
-        terminated(char(','), space0),
-        parse_quoted_string,
-    ).parse(input)?;
-    let (input, _) = char(')')(input)?;
-    let (input, _) = char('.')(input)?;
-
-    Ok((input, ParentRelation { parent, child }))
-}
-
-fn parse_datalog(input: &str) -> IResult<&str, Vec<ParentRelation>> {
-    many1(terminated(parse_parent_relation, space0)).parse(input)
-}
+use dataloglite::{parse_datalog, ParentRelation};
 
 use std::{fs};
 use clap::Parser;  // Now this is the only Parser in scope
@@ -49,6 +9,32 @@ use clap::Parser;  // Now this is the only Parser in scope
 struct Args {
     /// Input file to parse
     input_file: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_single_relation() {
+        let input = r#"parent("Alice", "Bob")."#;
+        let (remaining, relations) = parse_parent_relation(input).unwrap();
+        assert_eq!(remaining, "");
+        assert_eq!(relations.parent, "Alice");
+        assert_eq!(relations.child, "Bob");
+    }
+
+    #[test]
+    fn test_parse_multiple_relations() {
+        let input = r#"parent("A", "B"). parent("B", "C")."#;
+        let (remaining, relations) = parse_datalog(input).unwrap();
+        assert_eq!(remaining, "");
+        assert_eq!(relations.len(), 2);
+        assert_eq!(relations[0].parent, "A");
+        assert_eq!(relations[0].child, "B");
+        assert_eq!(relations[1].parent, "B");
+        assert_eq!(relations[1].child, "C");
+    }
 }
 
 fn main() {
