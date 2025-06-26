@@ -1,4 +1,4 @@
-use dataloglite::{parse_datalog, ParentRelation};
+use dataloglite::parse_datalog;
 
 use std::{fs};
 use clap::Parser;  // Now this is the only Parser in scope
@@ -14,6 +14,7 @@ struct Args {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use dataloglite::parse_parent_relation;
 
     #[test]
     fn test_parse_single_relation() {

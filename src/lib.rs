@@ -37,5 +37,9 @@ pub fn parse_parent_relation(input: &str) -> IResult<&str, ParentRelation> {
 }
 
 pub fn parse_datalog(input: &str) -> IResult<&str, Vec<ParentRelation>> {
-    many1(terminated(parse_parent_relation, space0)).parse(input)
+    many1(terminated(
+        parse_parent_relation,
+        // Consume both spaces and newlines after each relation
+        nom::character::complete::multispace0
+    )).parse(input)
 }
