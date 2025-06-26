@@ -1,5 +1,5 @@
-use dataloglite::{parse_datalog, parse_relation};
 use dataloglite::DatalogItem;
+use dataloglite::{parse_datalog, parse_relation};
 
 #[test]
 fn test_parse_single_relation() {
@@ -51,15 +51,19 @@ fn test_parse_fact() {
 
 #[test]
 fn test_parse_rule() {
-    // let input r#"father(X, Y) :- parent(X, Y), male(X)."#;
-    let input r#"father(X, Y) :- ."#;
-    let (remaining, rule) = parse_datalog(input).unwrap();
+    let input = r#"father(X, Y) :- parent(X, Y), male(X)."#;
+    let (remaining, items) = parse_datalog(input).unwrap();
     assert_eq!(remaining, "");
-    assert_eq!(rule.name, "father");
-    assert_eq!(rule.first, "X");
-    assert_eq!(rule.second, "Y");
-    assert_eq!(rule.relations.len(), 2);
-    assert_eq!(rule.relations[0].name, "parent");
-    assert_eq!(rule.relations[0].first, "X");
-    assert_eq!(rule.relations[0].second, "Y");
+    match &items[0] {
+        DatalogItem::Rule(el) => {
+            assert_eq!(el.name, "father");
+            assert_eq!(el.first, "X");
+            assert_eq!(el.second, "Y");
+            assert_eq!(el.relations.len(), 2);
+            assert_eq!(el.relations[0].name, "parent");
+            assert_eq!(el.relations[0].first, "X");
+            assert_eq!(el.relations[0].second, "Y");
+        }
+        _ => panic!("Expected Fact variant"),
+    }
 }

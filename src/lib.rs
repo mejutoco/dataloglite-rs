@@ -5,8 +5,7 @@ use nom::{
     combinator::{map, recognize},
     multi::{many0, separated_list1},
     sequence::{delimited, preceded, separated_pair, terminated},
-    IResult,
-    Parser as NomParser,
+    IResult, Parser as NomParser,
 };
 
 #[derive(Debug)]
@@ -38,42 +37,33 @@ pub struct Rule {
 }
 
 pub fn parse_quoted_string(input: &str) -> IResult<&str, String> {
-    delimited(
-        char('"'),
-        map(alpha1, |s: &str| s.to_string()),
-        char('"'),
-    ).parse(input)
+    delimited(char('"'), map(alpha1, |s: &str| s.to_string()), char('"')).parse(input)
 }
 
 pub fn parse_variable(input: &str) -> IResult<&str, String> {
     map(
-        recognize(
-            preceded(
-                nom::character::complete::satisfy(|c| c.is_ascii_uppercase()),
-                nom::character::complete::alphanumeric0
-            )
-        ),
-        |s: &str| s.to_string()
-    ).parse(input)
+        recognize(preceded(
+            nom::character::complete::satisfy(|c| c.is_ascii_uppercase()),
+            nom::character::complete::alphanumeric0,
+        )),
+        |s: &str| s.to_string(),
+    )
+    .parse(input)
 }
 
 pub fn parse_argument(input: &str) -> IResult<&str, String> {
-    alt((
-        parse_quoted_string,
-        parse_variable,
-    )).parse(input)
+    alt((parse_quoted_string, parse_variable)).parse(input)
 }
 
 pub fn parse_name(input: &str) -> IResult<&str, String> {
     map(
-        recognize(
-            preceded(
-                nom::character::complete::satisfy(|c| c.is_ascii_lowercase()),
-                nom::character::complete::alpha0
-            )
-        ),
-        |s: &str| s.to_string()
-    ).parse(input)
+        recognize(preceded(
+            nom::character::complete::satisfy(|c| c.is_ascii_lowercase()),
+            nom::character::complete::alpha0,
+        )),
+        |s: &str| s.to_string(),
+    )
+    .parse(input)
 }
 
 pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
@@ -83,11 +73,19 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
         parse_quoted_string,
         terminated(char(','), space0),
         parse_quoted_string,
-    ).parse(input)?;
+    )
+    .parse(input)?;
     let (input, _) = char(')')(input)?;
     let (input, _) = char('.')(input)?;
 
-    Ok((input, Relation { name, first, second }))
+    Ok((
+        input,
+        Relation {
+            name,
+            first,
+            second,
+        },
+    ))
 }
 
 pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
@@ -106,23 +104,22 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
     let (input, first) = parse_argument(input)?;
     let (input, _) = terminated(char(','), space0).parse(input)?;
     let (input, second) = parse_argument(input)?;
-    let (input, _) = terminated(char(')'), space0).parse(input)?;
-    let (input, _) = delimited(
-        space0,
-        tag(":-"),
-        space0,
-    ).parse(input)?;
-    // let (input, relations) = separated_list1(
-    //     terminated(char(','), space0),
-    //     parse_relation
-    // ).parse(input)?;
+    let (input, _) = char(')')(input)?;
+    let (input, _) = delimited(space0, tag(":-"), space0).parse(input)?;
+    let (input, relations) =
+        separated_list1(terminated(char(','), space0), parse_relation).parse(input)?;
     let (input, _) = char('.')(input)?;
 
     // Ok((input, Rule { name, first, second, relations }))
-    let relations = vec![
-        Relation { name: "parent".to_string(), first: "X".to_string(), second: "X".to_string() },
-    ]; // Placeholder for actual relations parsing
-    Ok((input, Rule { name, first, second, relations }))
+    Ok((
+        input,
+        Rule {
+            name,
+            first,
+            second,
+            relations,
+        },
+    ))
 }
 
 pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
@@ -130,12 +127,14 @@ pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
         map(parse_fact, DatalogItem::Fact),
         map(parse_relation, DatalogItem::Relation),
         map(parse_rule, DatalogItem::Rule),
-    )).parse(input)
+    ))
+    .parse(input)
 }
 
 pub fn parse_datalog(input: &str) -> IResult<&str, Vec<DatalogItem>> {
     many0(terminated(
         parse_datalog_item,
-        nom::character::complete::multispace0
-    )).parse(input)
+        nom::character::complete::multispace0,
+    ))
+    .parse(input)
 }
