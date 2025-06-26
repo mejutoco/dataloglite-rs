@@ -98,7 +98,7 @@ fn test_parse_rule() {
     assert_eq!(rel.first, "X");
     assert_eq!(rel.second, "Y");
 
-    // Check second relation
+    // Check fact
     let DatalogItem::Fact(rel) = &relations[1] else {
         panic!("Expected Fact");
     };

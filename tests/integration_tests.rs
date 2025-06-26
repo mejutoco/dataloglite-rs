@@ -1,4 +1,4 @@
-use dataloglite::{parse_datalog, DatalogItem};
+use dataloglite::{parse_datalog, DatalogItem, RuleDefinition};
 use std::fs;
 
 #[test]
@@ -50,12 +50,12 @@ fn test_example_comments() {
 
 #[test]
 fn test_cousins_facts_rules() {
-    let input = fs::read_to_string("test_examples/example_comments.datalog")
+    let input = fs::read_to_string("test_examples/cousins_facts_rules.datalog")
         .expect("Failed to read test file");
     let (remaining, items) = parse_datalog(&input).expect("Failed to parse");
 
     assert_eq!(remaining, "");
-    assert_eq!(items.len(), 10);
+    assert_eq!(items.len(), 11);
 
     // Verify some parent relations
     assert!(items.iter().any(|r| match r {
@@ -78,4 +78,22 @@ fn test_cousins_facts_rules() {
     assert_eq!(el.first, "X");
     assert_eq!(el.second, "Y");
     assert_eq!(el.definition.relations.len(), 2);
+
+    let RuleDefinition { relations } = &el.definition;
+    assert_eq!(relations.len(), 2);
+
+    // Check first relation
+    let DatalogItem::Relation(rel) = &relations[0] else {
+        panic!("Expected Relation");
+    };
+    assert_eq!(rel.name, "parent");
+    assert_eq!(rel.first, "X");
+    assert_eq!(rel.second, "Y");
+
+    // Check fact
+    let DatalogItem::Fact(rel) = &relations[1] else {
+        panic!("Expected Fact");
+    };
+    assert_eq!(rel.name, "male");
+    assert_eq!(rel.first, "X");
 }

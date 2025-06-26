@@ -12,3 +12,6 @@ parent("Diana", "Henry").
 /* Rules for basic relationships */
 // X is a father of Y if X is male and parent of Y
 father(X, Y) :- parent(X, Y), male(X).
+// These people are their own fathers
+// TODO: fix
+//own_father(X, Y) :- parent(X, Y), male(X), parent(Y, X).
