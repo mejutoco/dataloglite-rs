@@ -127,12 +127,6 @@ pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
 }
 
 pub fn parse_datalog(input: &str) -> IResult<&str, Vec<DatalogItem>> {
-    if input.trim().is_empty() {
-        return Err(nom::Err::Error(nom::error::Error::new(
-            input,
-            nom::error::ErrorKind::Eof,
-        )));
-    }
     many0(terminated(
         parse_datalog_item,
         nom::character::complete::multispace0

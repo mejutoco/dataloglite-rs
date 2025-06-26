@@ -49,16 +49,16 @@ fn test_parse_fact() {
     }
 }
 
-// #[test]
-// fn test_parse_rule() {
-//     let input r#"father(X, Y) :- parent(X, Y), male(X)."#;
-//     let (remaining, rule) = parse_datalog(input).unwrap();
-//     assert_eq!(remaining, "");
-//     assert_eq!(rule.name, "father");
-//     assert_eq!(rule.first, "X");
-//     assert_eq!(rule.second, "Y");
-//     assert_eq!(rule.relations.len(), 2);
-//     assert_eq!(rule.relations[0].name, "parent");
-//     assert_eq!(rule.relations[0].first, "X");
-//     assert_eq!(rule.relations[0].second, "Y");
-// }
+#[test]
+fn test_parse_rule() {
+    let input r#"father(X, Y) :- parent(X, Y), male(X)."#;
+    let (remaining, rule) = parse_datalog(input).unwrap();
+    assert_eq!(remaining, "");
+    assert_eq!(rule.name, "father");
+    assert_eq!(rule.first, "X");
+    assert_eq!(rule.second, "Y");
+    assert_eq!(rule.relations.len(), 2);
+    assert_eq!(rule.relations[0].name, "parent");
+    assert_eq!(rule.relations[0].first, "X");
+    assert_eq!(rule.relations[0].second, "Y");
+}
