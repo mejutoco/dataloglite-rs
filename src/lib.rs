@@ -172,9 +172,9 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
 
 pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
     alt((
+        map(parse_rule, DatalogItem::Rule),
         map(parse_fact, DatalogItem::Fact),
         map(parse_relation, DatalogItem::Relation),
-        map(parse_rule, DatalogItem::Rule),
     ))
     .parse(input)
 }

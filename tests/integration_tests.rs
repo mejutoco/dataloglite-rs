@@ -39,25 +39,43 @@ fn test_empty_input() {
 }
 
 #[test]
-fn test_cousins_facts_rules() {
+fn test_example_comments() {
     let input = fs::read_to_string("test_examples/example_comments.datalog")
         .expect("Failed to read test file");
     let (remaining, relations) = parse_datalog(&input).expect("Failed to parse");
 
     assert_eq!(remaining, "");
     assert_eq!(relations.len(), 10);
+}
 
-    // // Verify some parent relations
-    // assert!(relations.iter().any(|r| match r {
-    //     DatalogItem::Relation(rel) => rel.first == "Alice" && rel.second == "Bob",
-    //     _ => false,
-    // }));
-    // assert!(relations.iter().any(|r| match r {
-    //     DatalogItem::Relation(rel) => rel.first == "Alice" && rel.second == "Barbara",
-    //     _ => false,
-    // }));
-    // assert!(relations.iter().any(|r| match r {
-    //     DatalogItem::Relation(rel) => rel.first == "Diana" && rel.second == "Henry",
-    //     _ => false,
-    // }));
+#[test]
+fn test_cousins_facts_rules() {
+    let input = fs::read_to_string("test_examples/example_comments.datalog")
+        .expect("Failed to read test file");
+    let (remaining, items) = parse_datalog(&input).expect("Failed to parse");
+
+    assert_eq!(remaining, "");
+    assert_eq!(items.len(), 10);
+
+    // Verify some parent relations
+    assert!(items.iter().any(|r| match r {
+        DatalogItem::Relation(rel) => rel.first == "Alice" && rel.second == "Bob",
+        _ => false,
+    }));
+    assert!(items.iter().any(|r| match r {
+        DatalogItem::Relation(rel) => rel.first == "Alice" && rel.second == "Barbara",
+        _ => false,
+    }));
+    assert!(items.iter().any(|r| match r {
+        DatalogItem::Relation(rel) => rel.first == "Diana" && rel.second == "Henry",
+        _ => false,
+    }));
+    print!("Parsed items: {:#?}", items);
+    let DatalogItem::Rule(el) = &items[items.len() - 1] else {
+        panic!("Expected Rule variant");
+    };
+    assert_eq!(el.name, "father");
+    assert_eq!(el.first, "X");
+    assert_eq!(el.second, "Y");
+    assert_eq!(el.definition.relations.len(), 2);
 }
