@@ -4,3 +4,4 @@ parent("Alice", "Barbara").
 parent("Bob", "Charlie").
 
 ?parent("Alice", "Bob").
+?parent("Alice", "Charlie").

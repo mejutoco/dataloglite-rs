@@ -8,7 +8,7 @@ use nom::{
     IResult, Parser as NomParser,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Fact {
     pub name: String,
     pub first: String,
@@ -27,7 +27,7 @@ pub struct Query {
     pub relation: Relation,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 pub struct Relation {
     pub name: String,
     pub first: String,

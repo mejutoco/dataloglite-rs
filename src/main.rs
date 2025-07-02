@@ -1,4 +1,6 @@
 use dataloglite::parse_datalog;
+use dataloglite::DatalogItem;
+use std::collections::HashSet;
 
 use clap::Parser;
 use std::fs; // Now this is the only Parser in scope
@@ -32,6 +34,9 @@ fn main() {
         std::process::exit(1);
     }
 
+    let mut facts: HashSet<dataloglite::Fact> = HashSet::new();
+    let mut relations: HashSet<dataloglite::Relation> = HashSet::new();
+
     match parse_datalog(&input) {
         Ok((_, items)) => {
             if items.is_empty() {
@@ -40,19 +45,32 @@ fn main() {
                 println!("Parsed items:");
                 for rel in items {
                     match rel {
-                        dataloglite::DatalogItem::Fact(rel) => {
-                            println!("{} is {}", rel.name, rel.first)
+                        DatalogItem::Fact(el) => {
+                            println!("{} is {}", el.name, el.first);
+                            // add to sets
+                            facts.insert(el);
                         }
-                        dataloglite::DatalogItem::Relation(rel) => {
-                            println!("{} is {} of {}", rel.name, rel.first, rel.second)
+                        DatalogItem::Relation(el) => {
+                            println!("{} is {} of {}", el.name, el.first, el.second);
+                            // add to sets
+                            relations.insert(el);
                         }
-                        dataloglite::DatalogItem::Rule(rel) => {
-                            println!("{} of {}, {} means TODO", rel.name, rel.first, rel.second)
+                        DatalogItem::Rule(el) => {
+                            println!("{} of {}, {} means TODO", el.name, el.first, el.second);
+                            // add to sets
                         }
-                        dataloglite::DatalogItem::Query(q) => println!(
-                            "Query: {} is {} of {}?",
-                            q.relation.name, q.relation.first, q.relation.second
-                        ),
+                        DatalogItem::Query(q) => {
+                            println!(
+                                "Query: {} is {} of {}?",
+                                q.relation.name, q.relation.first, q.relation.second
+                            );
+                            // execute query
+                            if relations.contains(&q.relation) {
+                                println!("true");
+                            } else {
+                                println!("false");
+                            }
+                        }
                     }
                 }
             }
