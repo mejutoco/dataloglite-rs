@@ -1,0 +1,6 @@
+/* Base facts: Parent-Child relationships */
+parent("Alice", "Bob").
+parent("Alice", "Barbara").
+parent("Bob", "Charlie").
+
+?parent("Alice", "Bob").
