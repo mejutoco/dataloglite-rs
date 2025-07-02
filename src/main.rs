@@ -1,7 +1,7 @@
 use dataloglite::parse_datalog;
 
-use std::{fs};
-use clap::Parser;  // Now this is the only Parser in scope
+use clap::Parser;
+use std::fs; // Now this is the only Parser in scope
 
 /// Simple program to parse datalog files
 #[derive(Parser, Debug)]
@@ -40,9 +40,19 @@ fn main() {
                 println!("Parsed items:");
                 for rel in items {
                     match rel {
-                        dataloglite::DatalogItem::Fact(rel) => println!("{} is {}", rel.name, rel.first),
-                        dataloglite::DatalogItem::Relation(rel) => println!("{} is {} of {}", rel.name, rel.first, rel.second),
-                        dataloglite::DatalogItem::Rule(rel) => println!("{} of {}, {} means TODO", rel.name, rel.first, rel.second),
+                        dataloglite::DatalogItem::Fact(rel) => {
+                            println!("{} is {}", rel.name, rel.first)
+                        }
+                        dataloglite::DatalogItem::Relation(rel) => {
+                            println!("{} is {} of {}", rel.name, rel.first, rel.second)
+                        }
+                        dataloglite::DatalogItem::Rule(rel) => {
+                            println!("{} of {}, {} means TODO", rel.name, rel.first, rel.second)
+                        }
+                        dataloglite::DatalogItem::Query(q) => println!(
+                            "Query: {} is {} of {}?",
+                            q.relation.name, q.relation.first, q.relation.second
+                        ),
                     }
                 }
             }

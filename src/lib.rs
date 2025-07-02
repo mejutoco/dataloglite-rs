@@ -19,6 +19,12 @@ pub enum DatalogItem {
     Fact(Fact),
     Relation(Relation),
     Rule(Rule),
+    Query(Query),
+}
+
+#[derive(Debug)]
+pub struct Query {
+    pub relation: Relation,
 }
 
 #[derive(Debug)]
@@ -94,6 +100,15 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
             second,
         },
     ))
+}
+
+pub fn parse_query(input: &str) -> IResult<&str, Query> {
+    let (input, _) = char('?')(input)?;
+    let (input, rel) = parse_relation(input)?;
+
+    let query = Query { relation: rel };
+
+    Ok((input, query))
 }
 
 pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
@@ -178,6 +193,7 @@ pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
         map(parse_rule, DatalogItem::Rule),
         map(parse_fact, DatalogItem::Fact),
         map(parse_relation, DatalogItem::Relation),
+        map(parse_query, DatalogItem::Query),
     ))
     .parse(input)
 }
