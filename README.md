@@ -12,8 +12,11 @@ cargo run test_examples/cousins_facts_rules.datalog
 
 ### TODO:
 
-- Parse cousins_full.datalog
-- Implement queries -[x] basic relationship true or false
+- Implement queries
+
+  - query facts by quering one parameter
+    - `?male('Bob')`
+
 - create a formatter
   - canonical order for
     - facts
