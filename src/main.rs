@@ -1,7 +1,4 @@
-use dataloglite::parser::parse_datalog;
-use dataloglite::parser::DatalogItem;
 use dataloglite::query_engine::execute_query;
-use std::collections::HashSet;
 
 use clap::Parser;
 use std::fs;
@@ -32,9 +29,6 @@ fn main() {
         eprintln!("Error: Input file is empty");
         std::process::exit(1);
     }
-
-    // let mut facts: HashSet<dataloglite::parser::Fact> = HashSet::new();
-    // let mut relations: HashSet<dataloglite::parser::Relation> = HashSet::new();
 
     execute_query(&input);
 }

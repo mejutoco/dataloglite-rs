@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::hash::Hash;
 
 pub struct Database {
     facts: HashSet<crate::parser::Fact>,
