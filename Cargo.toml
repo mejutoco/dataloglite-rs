@@ -12,3 +12,4 @@ path = "src/lib.rs"
 [dependencies]
 nom = "8.0.0"
 clap = { version = "4.0", features = ["derive"] }
+indoc = "2.0.6"

@@ -2,6 +2,7 @@ use dataloglite::{
     parser::{parse_datalog, DatalogItem, RuleDefinition},
     query_engine::execute_query,
 };
+use indoc::indoc;
 use std::fs;
 
 #[test]
@@ -109,16 +110,12 @@ fn test_query_relation_is_true() {
     let mut buffer = Vec::new();
     execute_query(&input, &mut buffer);
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
-    println!("Output2:\n{}", output);
 
-    let expected_output = r#"
-parent is Alice of Bob
-Query: parent is Alice of Bob?
-true
-Query: parent is Alice of Charlie?
-false
-
-    "#
-    .trim();
+    let expected_output = indoc! {"
+        parent is Alice of Bob
+        Query: parent is Alice of Bob?
+        true
+        Query: parent is Alice of Charlie?
+        false"};
     assert_eq!(output.trim(), expected_output)
 }
