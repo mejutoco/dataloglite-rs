@@ -1,4 +1,4 @@
-use dataloglite::parse_query;
+use dataloglite::parser::parse_query;
 
 #[test]
 fn test_parse_query_relation() {

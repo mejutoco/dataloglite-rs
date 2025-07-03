@@ -1,10 +1,10 @@
-use dataloglite::{parse_datalog, DatalogItem, RuleDefinition};
+use dataloglite::parser::{parse_datalog, DatalogItem, RuleDefinition};
 use std::fs;
 
 #[test]
 fn test_example_datalog() {
     let input =
-        fs::read_to_string("test_examples/example.datalog").expect("Failed to read test file");
+        fs::read_to_string("test_examples/parser/basic.datalog").expect("Failed to read test file");
     let (remaining, relations) = parse_datalog(&input).expect("Failed to parse");
 
     // After parsing all relations, we should have nothing left (not even whitespace)
@@ -40,7 +40,7 @@ fn test_empty_input() {
 
 #[test]
 fn test_example_comments() {
-    let input = fs::read_to_string("test_examples/example_comments.datalog")
+    let input = fs::read_to_string("test_examples/parser/comments.datalog")
         .expect("Failed to read test file");
     let (remaining, relations) = parse_datalog(&input).expect("Failed to parse");
 
@@ -50,7 +50,7 @@ fn test_example_comments() {
 
 #[test]
 fn test_cousins_facts_rules() {
-    let input = fs::read_to_string("test_examples/cousins_facts_rules.datalog")
+    let input = fs::read_to_string("test_examples/parser/cousins_facts_rules.datalog")
         .expect("Failed to read test file");
     let (remaining, items) = parse_datalog(&input).expect("Failed to parse");
 

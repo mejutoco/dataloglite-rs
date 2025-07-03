@@ -3,7 +3,7 @@
 Run with
 
 ```bash
-cargo run test_examples/query_basic_relation.datalog
+cargo run test_examples/queries/basic_relation.datalog
 ```
 
 ```bash

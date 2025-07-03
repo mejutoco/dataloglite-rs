@@ -1,5 +1,5 @@
-use dataloglite::{parse_datalog, parse_relation, parse_rule_definition};
-use dataloglite::{DatalogItem, RuleDefinition};
+use dataloglite::parser::{parse_datalog, parse_relation, parse_rule_definition};
+use dataloglite::parser::{DatalogItem, RuleDefinition};
 
 #[test]
 fn test_parse_single_relation() {
