@@ -112,12 +112,15 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
 pub fn parse_query(input: &str) -> IResult<&str, Query> {
     let (input, _) = char('?')(input)?;
     // TODO: parse alts
-    let (input, rel) = parse_relation(input)?;
-    let rel2 = NonQueryDatalogItem::Relation(rel);
+    // let (input, rel) = parse_relation(input)?;
+    // let item = NonQueryDatalogItem::Relation(rel);
+    let (input, item) = alt((
+        map(parse_fact, NonQueryDatalogItem::Fact),
+        map(parse_relation, NonQueryDatalogItem::Relation),
+    ))
+    .parse(input)?;
 
-    let query = Query { data: rel2 };
-
-    Ok((input, query))
+    Ok((input, Query { data: item }))
 }
 
 pub fn parse_fact(input: &str) -> IResult<&str, Fact> {

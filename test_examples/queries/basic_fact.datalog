@@ -1,0 +1,5 @@
+female("Alice").
+male("Bob").
+
+?female("Alice").
+?male("Alice").

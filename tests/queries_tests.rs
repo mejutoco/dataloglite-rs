@@ -1,33 +1,26 @@
-use dataloglite::parser::parse_query;
+use dataloglite::parser::{parse_query, NonQueryDatalogItem};
 
 #[test]
 fn test_parse_query_relation() {
     let input = r#"?parent("Alice", "Bob")."#;
     let (remaining, query) = parse_query(input).unwrap();
-    let data = query.data;
+    let NonQueryDatalogItem::Relation(el) = query.data else {
+        panic!("Expected NonQueryDatalogItem::Relation");
+    };
     assert_eq!(remaining, "");
-    assert_eq!(data.name, "parent");
-    assert_eq!(data.first, "Alice");
-    assert_eq!(data.second, "Bob");
+    assert_eq!(el.name, "parent");
+    assert_eq!(el.first, "Alice");
+    assert_eq!(el.second, "Bob");
 }
 
 #[test]
 fn test_parse_query_fact() {
     let input = r#"?female("Alice")."#;
     let (remaining, query) = parse_query(input).unwrap();
-    let data = query.data;
+    let NonQueryDatalogItem::Fact(el) = query.data else {
+        panic!("Expected NonQueryDatalogItem::Fact");
+    };
     assert_eq!(remaining, "");
-    assert_eq!(data.name, "parent");
-    assert_eq!(data.first, "Alice");
-    assert_eq!(data.second, "Bob");
+    assert_eq!(el.name, "female");
+    assert_eq!(el.first, "Alice");
 }
-
-// #[test]
-// fn test_query_relation_is_true() {
-//     let input = r#"parent("Alice", "Bob")."#;
-//     let (remaining, relation) = parse_relation(input).unwrap();
-//     assert_eq!(remaining, "");
-//     assert_eq!(relation.name, "parent");
-//     assert_eq!(relation.first, "Alice");
-//     assert_eq!(relation.second, "Bob");
-// }

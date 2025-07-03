@@ -2,44 +2,56 @@ use crate::api::Database;
 use crate::parser::parse_datalog;
 use crate::parser::DatalogItem;
 use crate::parser::NonQueryDatalogItem;
+use std::io::Write;
 
-pub fn execute_query(input: &str) {
+pub fn execute_query<W: Write>(input: &str, mut writer: W) {
     let mut db = Database::new();
     match parse_datalog(input) {
         Ok((_, items)) => {
             if items.is_empty() {
-                println!("No valid datalog items found");
+                writeln!(writer, "No valid datalog items found").unwrap();
             } else {
-                println!("Parsed items:");
+                // writeln!(writer, "Parsed items:").unwrap();
                 for rel in items {
                     match rel {
                         DatalogItem::Fact(el) => {
-                            println!("{} is {}", el.name, el.first);
+                            writeln!(writer, "{} is {}", el.name, el.first).unwrap();
                             db.add_fact(el);
                         }
                         DatalogItem::Relation(el) => {
-                            println!("{} is {} of {}", el.name, el.first, el.second);
+                            writeln!(writer, "{} is {} of {}", el.name, el.first, el.second)
+                                .unwrap();
                             db.add_relation(el);
                         }
                         DatalogItem::Rule(el) => {
-                            println!("{} of {}, {} means TODO", el.name, el.first, el.second);
+                            writeln!(
+                                writer,
+                                "{} of {}, {} means TODO",
+                                el.name, el.first, el.second
+                            )
+                            .unwrap();
                             // add to sets
                         }
                         DatalogItem::Query(q) => match q.data {
                             NonQueryDatalogItem::Relation(rel) => {
-                                println!("Query: {} is {} of {}?", rel.name, rel.first, rel.second);
+                                writeln!(
+                                    writer,
+                                    "Query: {} is {} of {}?",
+                                    rel.name, rel.first, rel.second
+                                )
+                                .unwrap();
                                 if db.contains_relation(&rel) {
-                                    println!("true");
+                                    writeln!(writer, "true").unwrap();
                                 } else {
-                                    println!("false");
+                                    writeln!(writer, "false").unwrap();
                                 }
                             }
                             NonQueryDatalogItem::Fact(fact) => {
-                                println!("Query: {} is {}", fact.name, fact.first);
+                                writeln!(writer, "Query: {} is {}", fact.name, fact.first).unwrap();
                                 if db.contains_fact(&fact) {
-                                    println!("true");
+                                    writeln!(writer, "true").unwrap();
                                 } else {
-                                    println!("false");
+                                    writeln!(writer, "false").unwrap();
                                 }
                             }
                             _ => eprintln!("Unsupported query type"),

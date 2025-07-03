@@ -1,4 +1,7 @@
-use dataloglite::parser::{parse_datalog, DatalogItem, RuleDefinition};
+use dataloglite::{
+    parser::{parse_datalog, DatalogItem, RuleDefinition},
+    query_engine::execute_query,
+};
 use std::fs;
 
 #[test]
@@ -70,7 +73,7 @@ fn test_cousins_facts_rules() {
         DatalogItem::Relation(rel) => rel.first == "Diana" && rel.second == "Henry",
         _ => false,
     }));
-    print!("Parsed items: {:#?}", items);
+    // print!("Parsed items: {:#?}", items);
     let DatalogItem::Rule(el) = &items[items.len() - 1] else {
         panic!("Expected Rule variant");
     };
@@ -96,4 +99,26 @@ fn test_cousins_facts_rules() {
     };
     assert_eq!(rel.name, "male");
     assert_eq!(rel.first, "X");
+}
+
+#[test]
+fn test_query_relation_is_true() {
+    let input = fs::read_to_string("test_examples/queries/basic_relation.datalog")
+        .expect("Failed to read test file");
+
+    let mut buffer = Vec::new();
+    execute_query(&input, &mut buffer);
+    let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+    println!("Output2:\n{}", output);
+
+    let expected_output = r#"
+parent is Alice of Bob
+Query: parent is Alice of Bob?
+true
+Query: parent is Alice of Charlie?
+false
+
+    "#
+    .trim();
+    assert_eq!(output.trim(), expected_output)
 }

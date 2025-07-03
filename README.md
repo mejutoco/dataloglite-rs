@@ -1,6 +1,6 @@
-## Dataloglite
+# Dataloglite
 
-Run with
+## Run with
 
 ```bash
 cargo run test_examples/queries/basic_relation.datalog
@@ -8,6 +8,12 @@ cargo run test_examples/queries/basic_relation.datalog
 
 ```bash
 cargo run test_examples/cousins_facts_rules.datalog
+```
+
+## Run tests with prints
+
+```bash
+cargo test -- --nocapture
 ```
 
 ### TODO:

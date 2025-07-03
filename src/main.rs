@@ -30,5 +30,5 @@ fn main() {
         std::process::exit(1);
     }
 
-    execute_query(&input);
+    execute_query(&input, std::io::stdout());
 }
