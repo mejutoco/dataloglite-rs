@@ -48,6 +48,11 @@ impl Database {
     pub fn contains_relation(&self, relation: &crate::parser::Relation) -> bool {
         self.relations.contains(relation)
     }
+
+    // Checks if a fact exists in the database
+    pub fn contains_fact(&self, fact: &crate::parser::Fact) -> bool {
+        self.facts.contains(fact)
+    }
 }
 
 impl Default for Database {

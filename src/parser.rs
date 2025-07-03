@@ -23,8 +23,15 @@ pub enum DatalogItem {
 }
 
 #[derive(Debug)]
+pub enum NonQueryDatalogItem {
+    Fact(Fact),
+    Relation(Relation),
+    Rule(Rule),
+}
+
+#[derive(Debug)]
 pub struct Query {
-    pub relation: Relation,
+    pub data: NonQueryDatalogItem,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
@@ -104,9 +111,11 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
 
 pub fn parse_query(input: &str) -> IResult<&str, Query> {
     let (input, _) = char('?')(input)?;
+    // TODO: parse alts
     let (input, rel) = parse_relation(input)?;
+    let rel2 = NonQueryDatalogItem::Relation(rel);
 
-    let query = Query { relation: rel };
+    let query = Query { data: rel2 };
 
     Ok((input, query))
 }
