@@ -1,0 +1,7 @@
+[tasks.build]
+command = "cargo"
+args = ["build", "--release"]
+
+[tasks.test_with_coverage]
+command = "cargo"
+args = ["tarpaulin","--out", "Html", "--ignore-tests"]

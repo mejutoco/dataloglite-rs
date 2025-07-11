@@ -16,6 +16,14 @@ cargo run test_examples/cousins_facts_rules.datalog
 cargo test -- --nocapture
 ```
 
+## Custom scripts
+
+```bash
+cargo make test_with_coverage
+```
+
+Coverage report will be at tarpaulin-report.html
+
 ### TODO:
 
 - Implement queries
