@@ -30,5 +30,5 @@ fn main() {
         std::process::exit(1);
     }
 
-    interpret(&input, std::io::stdout());
+    interpret(&input, &mut std::io::stdout());
 }

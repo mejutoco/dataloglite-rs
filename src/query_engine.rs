@@ -1,4 +1,3 @@
-use crate::api::Database;
 use crate::api::DatabaseInstance;
 use crate::parser::parse_datalog;
 use crate::parser::DatalogItem;
@@ -13,8 +12,7 @@ fn get_db_instance() -> &'static Mutex<DatabaseInstance> {
     DB_INSTANCE.get_or_init(|| Mutex::new(DatabaseInstance::new()))
 }
 
-// TODO: extract execute query
-pub fn execute_query<W: Write>(query: NonQueryDatalogItem, mut writer: W) {
+pub fn execute_query<W: Write>(query: NonQueryDatalogItem, writer: &mut W) {
     let mut db = get_db_instance().lock().unwrap();
     let db = db.get_db_mut();
     match query {
@@ -43,7 +41,7 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, mut writer: W) {
     }
 }
 
-pub fn interpret<W: Write>(input: &str, mut writer: W) {
+pub fn interpret<W: Write>(input: &str, writer: &mut W) {
     let mut db = get_db_instance().lock().unwrap();
     let db = db.get_db_mut();
     match parse_datalog(input) {
@@ -96,6 +94,7 @@ pub fn interpret<W: Write>(input: &str, mut writer: W) {
                             }
                             _ => eprintln!("Unsupported query type"),
                         },
+                        // DatalogItem::Query(q) => execute_query(q.data, writer),
                     }
                 }
             }
