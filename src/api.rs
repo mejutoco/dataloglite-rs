@@ -5,6 +5,29 @@ pub struct Database {
     relations: HashSet<crate::parser::Relation>,
 }
 
+pub struct DatabaseInstance {
+    db: Database,
+}
+
+impl DatabaseInstance {
+    /// Creates a new, empty Database instance
+    pub fn new() -> Self {
+        DatabaseInstance {
+            db: Database::new(),
+        }
+    }
+
+    /// Gets a reference to the underlying database
+    pub fn get_db(&self) -> &Database {
+        &self.db
+    }
+
+    /// Gets a mutable reference to the underlying database
+    pub fn get_db_mut(&mut self) -> &mut Database {
+        &mut self.db
+    }
+}
+
 impl Database {
     /// Creates a new, empty Database
     pub fn new() -> Self {
@@ -53,6 +76,8 @@ impl Database {
     pub fn contains_fact(&self, fact: &crate::parser::Fact) -> bool {
         self.facts.contains(fact)
     }
+
+    // TODO: add query for any query as string
 }
 
 impl Default for Database {

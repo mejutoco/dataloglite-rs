@@ -26,10 +26,7 @@ Coverage report will be at tarpaulin-report.html
 
 ### TODO:
 
-- Implement queries
-
-  - query facts by quering one parameter
-    - `?male('Bob')`
+- Implement more queries
 
 - create a formatter
   - canonical order for

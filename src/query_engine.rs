@@ -1,11 +1,51 @@
 use crate::api::Database;
+use crate::api::DatabaseInstance;
 use crate::parser::parse_datalog;
 use crate::parser::DatalogItem;
 use crate::parser::NonQueryDatalogItem;
 use std::io::Write;
+use std::sync::Mutex;
+use std::sync::OnceLock;
 
-pub fn execute_query<W: Write>(input: &str, mut writer: W) {
-    let mut db = Database::new();
+static DB_INSTANCE: OnceLock<Mutex<DatabaseInstance>> = OnceLock::new();
+
+fn get_db_instance() -> &'static Mutex<DatabaseInstance> {
+    DB_INSTANCE.get_or_init(|| Mutex::new(DatabaseInstance::new()))
+}
+
+// TODO: extract execute query
+pub fn execute_query<W: Write>(query: NonQueryDatalogItem, mut writer: W) {
+    let mut db = get_db_instance().lock().unwrap();
+    let db = db.get_db_mut();
+    match query {
+        NonQueryDatalogItem::Relation(rel) => {
+            writeln!(
+                writer,
+                "Query: {} is {} of {}?",
+                rel.name, rel.first, rel.second
+            )
+            .unwrap();
+            if db.contains_relation(&rel) {
+                writeln!(writer, "true").unwrap();
+            } else {
+                writeln!(writer, "false").unwrap();
+            }
+        }
+        NonQueryDatalogItem::Fact(fact) => {
+            writeln!(writer, "Query: {} is {}", fact.name, fact.first).unwrap();
+            if db.contains_fact(&fact) {
+                writeln!(writer, "true").unwrap();
+            } else {
+                writeln!(writer, "false").unwrap();
+            }
+        }
+        _ => eprintln!("Unsupported query type"),
+    }
+}
+
+pub fn interpret<W: Write>(input: &str, mut writer: W) {
+    let mut db = get_db_instance().lock().unwrap();
+    let db = db.get_db_mut();
     match parse_datalog(input) {
         Ok((_, items)) => {
             if items.is_empty() {

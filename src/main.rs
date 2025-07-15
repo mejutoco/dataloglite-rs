@@ -1,4 +1,4 @@
-use dataloglite::query_engine::execute_query;
+use dataloglite::query_engine::interpret;
 
 use clap::Parser;
 use std::fs;
@@ -30,5 +30,5 @@ fn main() {
         std::process::exit(1);
     }
 
-    execute_query(&input, std::io::stdout());
+    interpret(&input, std::io::stdout());
 }

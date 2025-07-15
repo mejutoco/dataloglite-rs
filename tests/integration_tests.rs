@@ -1,6 +1,6 @@
 use dataloglite::{
     parser::{parse_datalog, DatalogItem, RuleDefinition},
-    query_engine::execute_query,
+    query_engine::interpret,
 };
 use indoc::indoc;
 use std::fs;
@@ -108,7 +108,7 @@ fn test_query_relation() {
         .expect("Failed to read test file");
 
     let mut buffer = Vec::new();
-    execute_query(&input, &mut buffer);
+    interpret(&input, &mut buffer);
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
@@ -126,7 +126,7 @@ fn test_query_fact() {
         .expect("Failed to read test file");
 
     let mut buffer = Vec::new();
-    execute_query(&input, &mut buffer);
+    interpret(&input, &mut buffer);
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
