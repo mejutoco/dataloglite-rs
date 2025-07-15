@@ -3,6 +3,8 @@ use crate::api::DatabaseInstance;
 use crate::parser::parse_datalog;
 use crate::parser::DatalogItem;
 use crate::parser::NonQueryDatalogItem;
+use crate::parser::VariableBasedRelation;
+use itertools::Itertools;
 use std::io::Write;
 use std::sync::Mutex;
 use std::sync::OnceLock;
@@ -36,6 +38,28 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer
                 writeln!(writer, "false").unwrap();
             }
         }
+        NonQueryDatalogItem::VariableBasedRelation(item) => match item {
+            VariableBasedRelation::VariableBasedRelationFirstIsVar(rel) => {
+                writeln!(writer, "Query: Who is {} of {}?", rel.name, rel.second).unwrap();
+                let relations = db.relations_where_second_is(&rel.name, &rel.second);
+                writeln!(
+                    writer,
+                    "{}",
+                    relations.iter().map(|r| &r.first).format(", ")
+                )
+                .unwrap();
+            }
+            VariableBasedRelation::VariableBasedRelationSecondIsVar(rel) => {
+                writeln!(writer, "Query: Of whom is {} {}?", rel.first, rel.name).unwrap();
+                let relations = db.relations_where_first_is(&rel.name, &rel.first);
+                writeln!(
+                    writer,
+                    "{}",
+                    relations.iter().map(|r| &r.second).format(", ")
+                )
+                .unwrap();
+            }
+        },
         _ => eprintln!("Unsupported query type"),
     }
 }

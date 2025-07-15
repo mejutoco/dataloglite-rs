@@ -121,6 +121,42 @@ fn test_query_relation() {
 }
 
 #[test]
+fn test_query_variable_based_relation_second_is_var() {
+    let input =
+        fs::read_to_string("test_examples/queries/variable_based_query_second_is_var.datalog")
+            .expect("Failed to read test file");
+
+    let mut buffer = Vec::new();
+    interpret(&input, &mut buffer);
+    let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+
+    let expected_output = indoc! {"
+        parent is Alice of Bob
+        parent is Alice of Charlie
+        Query: Of whom is Alice parent?
+        Bob, Charlie"};
+    assert_eq!(output.trim(), expected_output)
+}
+
+#[test]
+fn test_query_variable_based_relation_first_is_var() {
+    let input =
+        fs::read_to_string("test_examples/queries/variable_based_query_first_is_var.datalog")
+            .expect("Failed to read test file");
+
+    let mut buffer = Vec::new();
+    interpret(&input, &mut buffer);
+    let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+
+    let expected_output = indoc! {"
+        parent is Alice of Bob
+        parent is Charlie of Bob
+        Query: Who is parent of Bob?
+        Alice, Charlie"};
+    assert_eq!(output.trim(), expected_output)
+}
+
+#[test]
 fn test_query_fact() {
     let input = fs::read_to_string("test_examples/queries/basic_fact.datalog")
         .expect("Failed to read test file");

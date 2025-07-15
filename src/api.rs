@@ -77,6 +77,39 @@ impl Database {
         self.facts.contains(fact)
     }
 
+    pub fn relations_where_first_is(
+        &self,
+        rel_name: &str,
+        first: &str,
+    ) -> Vec<&crate::parser::Relation> {
+        let mut results = Vec::new();
+        for relation in &self.relations {
+            if relation.name == rel_name && relation.first == first {
+                results.push(relation);
+            }
+        }
+        // Sort alphabetically by the 'second' field of the relation
+        results.sort_by(|a, b| a.second.cmp(&b.second));
+        return results;
+    }
+
+    // TODO: extract common between first and second
+    pub fn relations_where_second_is(
+        &self,
+        rel_name: &str,
+        second: &str,
+    ) -> Vec<&crate::parser::Relation> {
+        let mut results = Vec::new();
+        for relation in &self.relations {
+            if relation.name == rel_name && relation.second == second {
+                results.push(relation);
+            }
+        }
+        // Sort alphabetically by the 'first' field of the relation
+        results.sort_by(|a, b| a.first.cmp(&b.first));
+        return results;
+    }
+
     // TODO: add query for any query as string
 }
 
