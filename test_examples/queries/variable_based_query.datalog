@@ -1,0 +1,3 @@
+parent("Alice", "Bob").
+parent("Alice", "Charlie").
+?parent("Alice", X).

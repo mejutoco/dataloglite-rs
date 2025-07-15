@@ -26,6 +26,7 @@ pub enum DatalogItem {
 pub enum NonQueryDatalogItem {
     Fact(Fact),
     Relation(Relation),
+    VariableBasedRelation(VariableBasedRelation),
     Rule(Rule),
 }
 
@@ -39,6 +40,24 @@ pub struct Relation {
     pub name: String,
     pub first: String,
     pub second: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub enum VariableBasedRelation {
+    VariableBasedRelationFirstIsVar(VariableBasedRelationFirstIsVar),
+    VariableBasedRelationSecondIsVar(VariableBasedRelationSecondIsVar),
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct VariableBasedRelationFirstIsVar {
+    pub name: String,
+    pub second: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct VariableBasedRelationSecondIsVar {
+    pub name: String,
+    pub first: String,
 }
 
 #[derive(Debug)]
@@ -109,13 +128,49 @@ pub fn parse_relation(input: &str) -> IResult<&str, Relation> {
     ))
 }
 
+pub fn parse_variable_based_relation(input: &str) -> IResult<&str, VariableBasedRelation> {
+    let variable_char = "X";
+    let (input, name) = parse_name(input)?;
+    let (input, _) = char('(')(input)?;
+    let (input, (first, second)) = separated_pair(
+        parse_argument,
+        terminated(char(','), space0),
+        parse_argument,
+    )
+    .parse(input)?;
+    let (input, _) = char(')')(input)?;
+    let (input, _) = char('.')(input)?;
+
+    match (&first == variable_char, &second == variable_char) {
+        (true, false) => Ok((
+            input,
+            VariableBasedRelation::VariableBasedRelationFirstIsVar(
+                VariableBasedRelationFirstIsVar { name, second },
+            ),
+        )),
+        (false, true) => Ok((
+            input,
+            VariableBasedRelation::VariableBasedRelationSecondIsVar(
+                VariableBasedRelationSecondIsVar { name, first },
+            ),
+        )),
+        _ => Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Fail,
+        ))),
+    }
+}
+
 pub fn parse_query(input: &str) -> IResult<&str, Query> {
     let (input, _) = char('?')(input)?;
-    // TODO: parse alts
-    // let (input, rel) = parse_relation(input)?;
-    // let item = NonQueryDatalogItem::Relation(rel);
     let (input, item) = alt((
         map(parse_fact, NonQueryDatalogItem::Fact),
+        map(
+            parse_variable_based_relation,
+            NonQueryDatalogItem::VariableBasedRelation,
+        ),
+        // order is important
+        // after parse_variable_based_relation
         map(parse_relation, NonQueryDatalogItem::Relation),
     ))
     .parse(input)?;
