@@ -1,3 +1,4 @@
+use crate::api::Database;
 use crate::api::DatabaseInstance;
 use crate::parser::parse_datalog;
 use crate::parser::DatalogItem;
@@ -12,9 +13,7 @@ fn get_db_instance() -> &'static Mutex<DatabaseInstance> {
     DB_INSTANCE.get_or_init(|| Mutex::new(DatabaseInstance::new()))
 }
 
-pub fn execute_query<W: Write>(query: NonQueryDatalogItem, writer: &mut W) {
-    let mut db = get_db_instance().lock().unwrap();
-    let db = db.get_db_mut();
+pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer: &mut W) {
     match query {
         NonQueryDatalogItem::Relation(rel) => {
             writeln!(
@@ -42,59 +41,41 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, writer: &mut W) {
 }
 
 pub fn interpret<W: Write>(input: &str, writer: &mut W) {
-    let mut db = get_db_instance().lock().unwrap();
-    let db = db.get_db_mut();
+    let mut db_guard = get_db_instance().lock().unwrap();
+    let db = db_guard.get_db_mut();
+
     match parse_datalog(input) {
         Ok((_, items)) => {
             if items.is_empty() {
                 writeln!(writer, "No valid datalog items found").unwrap();
             } else {
-                // writeln!(writer, "Parsed items:").unwrap();
-                for rel in items {
-                    match rel {
-                        DatalogItem::Fact(el) => {
-                            writeln!(writer, "{} is {}", el.name, el.first).unwrap();
-                            db.add_fact(el);
+                for item in items {
+                    match item {
+                        DatalogItem::Fact(fact) => {
+                            writeln!(writer, "{} is {}", fact.name, fact.first).unwrap();
+                            db.add_fact(fact);
                         }
-                        DatalogItem::Relation(el) => {
-                            writeln!(writer, "{} is {} of {}", el.name, el.first, el.second)
-                                .unwrap();
-                            db.add_relation(el);
+                        DatalogItem::Relation(relation) => {
+                            writeln!(
+                                writer,
+                                "{} is {} of {}",
+                                relation.name, relation.first, relation.second
+                            )
+                            .unwrap();
+                            db.add_relation(relation);
                         }
-                        DatalogItem::Rule(el) => {
+                        DatalogItem::Rule(rule) => {
                             writeln!(
                                 writer,
                                 "{} of {}, {} means TODO",
-                                el.name, el.first, el.second
+                                rule.name, rule.first, rule.second
                             )
                             .unwrap();
-                            // add to sets
                         }
-                        DatalogItem::Query(q) => match q.data {
-                            NonQueryDatalogItem::Relation(rel) => {
-                                writeln!(
-                                    writer,
-                                    "Query: {} is {} of {}?",
-                                    rel.name, rel.first, rel.second
-                                )
-                                .unwrap();
-                                if db.contains_relation(&rel) {
-                                    writeln!(writer, "true").unwrap();
-                                } else {
-                                    writeln!(writer, "false").unwrap();
-                                }
-                            }
-                            NonQueryDatalogItem::Fact(fact) => {
-                                writeln!(writer, "Query: {} is {}", fact.name, fact.first).unwrap();
-                                if db.contains_fact(&fact) {
-                                    writeln!(writer, "true").unwrap();
-                                } else {
-                                    writeln!(writer, "false").unwrap();
-                                }
-                            }
-                            _ => eprintln!("Unsupported query type"),
-                        },
-                        // DatalogItem::Query(q) => execute_query(q.data, writer),
+                        DatalogItem::Query(query) => {
+                            // Use the already locked database instance
+                            execute_query(query.data, db, writer);
+                        }
                     }
                 }
             }
