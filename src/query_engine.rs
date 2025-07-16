@@ -17,6 +17,11 @@ fn get_db_instance() -> &'static Mutex<DatabaseInstance> {
 
 pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer: &mut W) {
     match query {
+        NonQueryDatalogItem::ConjunctiveQuery(query) => {
+            writeln!(writer, "Query: {}", query.name).unwrap();
+            let results = db.query_conjunctive(query);
+            writeln!(writer, "{}", results.iter().map(|r| r).format(", ")).unwrap();
+        }
         NonQueryDatalogItem::Relation(rel) => {
             writeln!(
                 writer,

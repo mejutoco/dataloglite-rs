@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+use crate::parser::ConjunctiveQuery;
+
 pub struct Database {
     facts: HashSet<crate::parser::Fact>,
     relations: HashSet<crate::parser::Relation>,
@@ -77,6 +79,37 @@ impl Database {
         self.facts.contains(fact)
     }
 
+    // And query
+    pub fn query_conjunctive(&self, q: ConjunctiveQuery) -> Vec<String> {
+        print!("Parsed items: {:#?}", q);
+        let mut results = Vec::new();
+        // we keep here results that might match
+        // and progressively filter them with each condition
+        // ?parent(X, Y), male(X).
+        let mut maybe_matches = HashSet::new();
+        for item in q.definition.data {
+            match item {
+                crate::parser::NonQueryDatalogItem::Relation(rel) => {
+                    if self.contains_relation(&rel) {
+                        maybe_matches.insert((rel.first.clone(), rel.second.clone()));
+                    }
+                }
+                crate::parser::NonQueryDatalogItem::Fact(fact) => {
+                    if self.contains_fact(&fact) {
+                        results.push(fact.first);
+                    }
+                }
+                _ => continue, // Skip unsupported items
+            }
+        }
+        // // Sort alphabetically by the 'second' field of the relation
+        // results.sort_by(|a, b| a.second.cmp(&b.second));
+        return results;
+    }
+
+    // TODO: relations_or_rule_where_first_is
+    // we could either precalculate all the rules or calculate them on the fly
+    // probably we precalculate all rules and iterate over which ones are relevant for this query
     pub fn relations_where_first_is(
         &self,
         rel_name: &str,

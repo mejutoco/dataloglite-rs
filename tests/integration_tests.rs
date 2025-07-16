@@ -174,3 +174,22 @@ fn test_query_fact() {
         false"};
     assert_eq!(output.trim(), expected_output)
 }
+
+// #[test]
+// fn test_query_conjunctive() {
+//     let input = fs::read_to_string("test_examples/queries/basic_conjunctive.datalog")
+//         .expect("Failed to read test file");
+
+//     let mut buffer = Vec::new();
+//     interpret(&input, &mut buffer);
+//     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+
+//     let expected_output = indoc! {"
+//         female is Alice
+//         male is Bob
+//         Query: female is Alice
+//         true
+//         Query: male is Alice
+//         false"};
+//     assert_eq!(output.trim(), expected_output)
+// }

@@ -27,12 +27,21 @@ pub enum NonQueryDatalogItem {
     Fact(Fact),
     Relation(Relation),
     VariableBasedRelation(VariableBasedRelation),
+    ConjunctiveQuery(ConjunctiveQuery),
     Rule(Rule),
 }
 
 #[derive(Debug)]
 pub struct Query {
     pub data: NonQueryDatalogItem,
+}
+
+#[derive(Debug)]
+pub struct ConjunctiveQuery {
+    pub name: String,
+    pub first: String,
+    pub second: String,
+    pub definition: ConjunctiveQueryDefinition,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
@@ -58,6 +67,11 @@ pub struct VariableBasedRelationFirstIsVar {
 pub struct VariableBasedRelationSecondIsVar {
     pub name: String,
     pub first: String,
+}
+
+#[derive(Debug)]
+pub struct ConjunctiveQueryDefinition {
+    pub data: Vec<NonQueryDatalogItem>,
 }
 
 #[derive(Debug)]
@@ -166,6 +180,10 @@ pub fn parse_query(input: &str) -> IResult<&str, Query> {
     let (input, item) = alt((
         map(parse_fact, NonQueryDatalogItem::Fact),
         map(
+            parse_conjunctive_query,
+            NonQueryDatalogItem::ConjunctiveQuery,
+        ),
+        map(
             parse_variable_based_relation,
             NonQueryDatalogItem::VariableBasedRelation,
         ),
@@ -251,6 +269,30 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
             first,
             second,
             definition,
+        },
+    ))
+}
+
+pub fn parse_conjunctive_query(input: &str) -> IResult<&str, ConjunctiveQuery> {
+    let (input, name) = parse_rule(input)?;
+    Ok((
+        input,
+        ConjunctiveQuery {
+            name: name.name,
+            first: name.first,
+            second: name.second,
+            definition: ConjunctiveQueryDefinition {
+                data: name
+                    .definition
+                    .relations
+                    .into_iter()
+                    .map(|item| match item {
+                        DatalogItem::Fact(fact) => NonQueryDatalogItem::Fact(fact),
+                        DatalogItem::Relation(rel) => NonQueryDatalogItem::Relation(rel),
+                        _ => panic!("Unexpected item in conjunctive query definition"),
+                    })
+                    .collect(),
+            },
         },
     ))
 }
