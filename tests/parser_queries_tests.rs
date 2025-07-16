@@ -50,6 +50,36 @@ fn test_parse_query_variable_based_relation_second_is_var() {
 }
 
 #[test]
+fn test_parse_query_projection_first_unknown() {
+    let input = r#"?parent(_, Y)."#;
+    let (remaining, query) = parse_query(input).unwrap();
+    print!("Parsed query: {:#?}", query);
+    let NonQueryDatalogItem::QueryProjection(q) = query.data else {
+        panic!("Expected NonQueryDatalogItem::QueryProjection");
+    };
+
+    assert_eq!(remaining, "");
+    assert_eq!(q.name, "parent");
+    assert_eq!(q.first, "_");
+    assert_eq!(q.second, "Y");
+}
+
+#[test]
+fn test_parse_query_projection_second_unknown() {
+    let input = r#"?parent(X, _)."#;
+    let (remaining, query) = parse_query(input).unwrap();
+    print!("Parsed query: {:#?}", query);
+    let NonQueryDatalogItem::QueryProjection(q) = query.data else {
+        panic!("Expected NonQueryDatalogItem::QueryProjection");
+    };
+
+    assert_eq!(remaining, "");
+    assert_eq!(q.name, "parent");
+    assert_eq!(q.first, "X");
+    assert_eq!(q.second, "_");
+}
+
+#[test]
 fn test_parse_query_fact() {
     let input = r#"?female("Alice")."#;
     let (remaining, query) = parse_query(input).unwrap();
