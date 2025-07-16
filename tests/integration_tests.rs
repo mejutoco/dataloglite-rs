@@ -219,6 +219,7 @@ fn test_query_conjunctive() {
     interpret(&input, &mut buffer, Some(true));
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
+    // TODO: fix. It should be Charlie
     let expected_output = indoc! {"
         male is Charlie
         male is Bob
