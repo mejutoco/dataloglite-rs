@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::parser::{ConjunctiveQuery, QueryProjectionRelation};
+use crate::parser::{ConjunctiveQuery, QueryProjectionFact, QueryProjectionRelation};
 
 pub struct Database {
     facts: HashSet<crate::parser::Fact>,
@@ -85,8 +85,7 @@ impl Database {
         self.facts.contains(fact)
     }
 
-    // list all x with relation or fact syntax
-    pub fn query_projection(&self, q: QueryProjectionRelation) -> Vec<String> {
+    pub fn query_projection_relation(&self, q: QueryProjectionRelation) -> Vec<String> {
         // print!("Parsed items: {:#?}", q);
         // print!("all relations: {:#?}", self.relations);
         let mut results = HashSet::new();
@@ -108,6 +107,20 @@ impl Database {
                 }
             }
             _ => unimplemented!("Query projection for non-variable cases not implemented"),
+        }
+        let mut results_vec: Vec<String> = results.into_iter().collect();
+        results_vec.sort();
+        results_vec
+    }
+
+    pub fn query_projection_fact(&self, q: QueryProjectionFact) -> Vec<String> {
+        // print!("Parsed items: {:#?}", q);
+        // print!("all relations: {:#?}", self.relations);
+        let mut results = HashSet::new();
+        for fact in &self.facts {
+            if fact.name == q.name {
+                results.insert(fact.first.clone());
+            }
         }
         let mut results_vec: Vec<String> = results.into_iter().collect();
         results_vec.sort();

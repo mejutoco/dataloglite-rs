@@ -17,6 +17,11 @@ fn get_db_instance() -> &'static Mutex<DatabaseInstance> {
 
 pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer: &mut W) {
     match query {
+        NonQueryDatalogItem::QueryProjectionFact(query) => {
+            writeln!(writer, "Query: list all where {}(_)", query.name).unwrap();
+            let results = db.query_projection_fact(query);
+            writeln!(writer, "{}", results.iter().map(|r| r).format(", ")).unwrap();
+        }
         NonQueryDatalogItem::QueryProjectionRelation(query) => {
             writeln!(
                 writer,
@@ -24,7 +29,7 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer
                 query.name, query.first, query.second
             )
             .unwrap();
-            let results = db.query_projection(query);
+            let results = db.query_projection_relation(query);
             writeln!(writer, "{}", results.iter().map(|r| r).format(", ")).unwrap();
         }
         NonQueryDatalogItem::ConjunctiveQuery(query) => {
