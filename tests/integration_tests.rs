@@ -175,6 +175,29 @@ fn test_query_fact() {
     assert_eq!(output.trim(), expected_output)
 }
 
+#[test]
+fn test_query_basic_projection() {
+    let input = fs::read_to_string("test_examples/queries/basic_projection.datalog")
+        .expect("Failed to read test file");
+
+    let mut buffer = Vec::new();
+    interpret(&input, &mut buffer);
+    let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+
+    let expected_output = indoc! {"
+        male is Charlie
+        male is Bob
+        female is Alice
+        female is Julie
+        parent is Alice of Bob
+        parent is Charlie of Bob
+        parent is Alice of Julie
+        parent is Charlie of Julie
+        Query: list all where parent(X, _)
+        Bob, Julie"};
+    assert_eq!(output.trim(), expected_output)
+}
+
 // #[test]
 // fn test_query_conjunctive() {
 //     let input = fs::read_to_string("test_examples/queries/basic_conjunctive.datalog")

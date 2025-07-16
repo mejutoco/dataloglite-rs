@@ -6,4 +6,4 @@ parent("Alice", "Bob").
 parent("Charlie", "Bob").
 parent("Alice", "Julie").
 parent("Charlie", "Julie").
-?parent(X, Y), male(X).
+?parent(X, _).
