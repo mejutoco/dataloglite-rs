@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::parser::{ConjunctiveQuery, QueryProjection};
+use crate::parser::{ConjunctiveQuery, QueryProjectionRelation};
 
 pub struct Database {
     facts: HashSet<crate::parser::Fact>,
@@ -69,6 +69,12 @@ impl Database {
         &self.relations
     }
 
+    // Clears the database
+    pub fn clear(&mut self) {
+        self.facts.clear();
+        self.relations.clear();
+    }
+
     // Checks if a relation exists in the database
     pub fn contains_relation(&self, relation: &crate::parser::Relation) -> bool {
         self.relations.contains(relation)
@@ -80,7 +86,7 @@ impl Database {
     }
 
     // list all x with relation or fact syntax
-    pub fn query_projection(&self, q: QueryProjection) -> Vec<String> {
+    pub fn query_projection(&self, q: QueryProjectionRelation) -> Vec<String> {
         // print!("Parsed items: {:#?}", q);
         // print!("all relations: {:#?}", self.relations);
         let mut results = HashSet::new();

@@ -50,12 +50,12 @@ fn test_parse_query_variable_based_relation_second_is_var() {
 }
 
 #[test]
-fn test_parse_query_projection_first_unknown() {
+fn test_parse_query_projection_relation_first_unknown() {
     let input = r#"?parent(_, Y)."#;
     let (remaining, query) = parse_query(input).unwrap();
     print!("Parsed query: {:#?}", query);
-    let NonQueryDatalogItem::QueryProjection(q) = query.data else {
-        panic!("Expected NonQueryDatalogItem::QueryProjection");
+    let NonQueryDatalogItem::QueryProjectionRelation(q) = query.data else {
+        panic!("Expected NonQueryDatalogItem::QueryProjectionRelation");
     };
 
     assert_eq!(remaining, "");
@@ -65,18 +65,31 @@ fn test_parse_query_projection_first_unknown() {
 }
 
 #[test]
-fn test_parse_query_projection_second_unknown() {
+fn test_parse_query_projection_relation_second_unknown() {
     let input = r#"?parent(X, _)."#;
     let (remaining, query) = parse_query(input).unwrap();
     print!("Parsed query: {:#?}", query);
-    let NonQueryDatalogItem::QueryProjection(q) = query.data else {
-        panic!("Expected NonQueryDatalogItem::QueryProjection");
+    let NonQueryDatalogItem::QueryProjectionRelation(q) = query.data else {
+        panic!("Expected NonQueryDatalogItem::QueryProjectionRelation");
     };
 
     assert_eq!(remaining, "");
     assert_eq!(q.name, "parent");
     assert_eq!(q.first, "X");
     assert_eq!(q.second, "_");
+}
+
+#[test]
+fn test_parse_query_projection_fact() {
+    let input = r#"?male(_)."#;
+    let (remaining, query) = parse_query(input).unwrap();
+    print!("Parsed query: {:#?}", query);
+    let NonQueryDatalogItem::QueryProjectionFact(q) = query.data else {
+        panic!("Expected NonQueryDatalogItem::QueryProjectionFact");
+    };
+
+    assert_eq!(remaining, "");
+    assert_eq!(q.name, "male");
 }
 
 #[test]

@@ -1,0 +1,9 @@
+male("Charlie").
+male("Bob").
+female("Alice").
+female("Julie").
+parent("Alice", "Bob").
+parent("Charlie", "Bob").
+parent("Alice", "Julie").
+parent("Charlie", "Julie").
+?male(_).

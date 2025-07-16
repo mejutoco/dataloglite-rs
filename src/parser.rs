@@ -28,7 +28,8 @@ pub enum NonQueryDatalogItem {
     Relation(Relation),
     VariableBasedRelation(VariableBasedRelation),
     ConjunctiveQuery(ConjunctiveQuery),
-    QueryProjection(QueryProjection),
+    QueryProjectionRelation(QueryProjectionRelation),
+    QueryProjectionFact(QueryProjectionFact),
     Rule(Rule),
 }
 
@@ -53,10 +54,15 @@ pub struct Relation {
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
-pub struct QueryProjection {
+pub struct QueryProjectionRelation {
     pub name: String,
     pub first: String,
     pub second: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub struct QueryProjectionFact {
+    pub name: String,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
@@ -202,7 +208,7 @@ pub fn parse_variable_based_relation(input: &str) -> IResult<&str, VariableBased
     }
 }
 
-pub fn parse_query_projection(input: &str) -> IResult<&str, QueryProjection> {
+pub fn parse_query_projection_relation(input: &str) -> IResult<&str, QueryProjectionRelation> {
     let unknown_char = "_";
     let (input, name) = parse_name(input)?;
     let (input, _) = char('(')(input)?;
@@ -218,7 +224,7 @@ pub fn parse_query_projection(input: &str) -> IResult<&str, QueryProjection> {
     match (&first == unknown_char, &second == unknown_char) {
         (true, false) => Ok((
             input,
-            QueryProjection {
+            QueryProjectionRelation {
                 name,
                 first: "_".to_string(),
                 second: second,
@@ -226,7 +232,7 @@ pub fn parse_query_projection(input: &str) -> IResult<&str, QueryProjection> {
         )),
         (false, true) => Ok((
             input,
-            QueryProjection {
+            QueryProjectionRelation {
                 name,
                 first: first,
                 second: "_".to_string(),
@@ -239,10 +245,28 @@ pub fn parse_query_projection(input: &str) -> IResult<&str, QueryProjection> {
     }
 }
 
+pub fn parse_query_projection_fact(input: &str) -> IResult<&str, QueryProjectionFact> {
+    let (input, name) = parse_name(input)?;
+    let (input, _) = char('(')(input)?;
+    let (input, _) = char('_')(input)?;
+    let (input, _) = char(')')(input)?;
+    let (input, _) = char('.')(input)?;
+
+    Ok((input, QueryProjectionFact { name }))
+}
+
 pub fn parse_query(input: &str) -> IResult<&str, Query> {
     let (input, _) = char('?')(input)?;
     let (input, item) = alt((
-        map(parse_query_projection, NonQueryDatalogItem::QueryProjection),
+        // TODO: all projections in one?
+        map(
+            parse_query_projection_fact,
+            NonQueryDatalogItem::QueryProjectionFact,
+        ),
+        map(
+            parse_query_projection_relation,
+            NonQueryDatalogItem::QueryProjectionRelation,
+        ),
         map(parse_fact, NonQueryDatalogItem::Fact),
         map(
             parse_conjunctive_query,

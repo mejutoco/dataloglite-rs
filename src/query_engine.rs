@@ -17,7 +17,7 @@ fn get_db_instance() -> &'static Mutex<DatabaseInstance> {
 
 pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer: &mut W) {
     match query {
-        NonQueryDatalogItem::QueryProjection(query) => {
+        NonQueryDatalogItem::QueryProjectionRelation(query) => {
             writeln!(
                 writer,
                 "Query: list all where {}({}, {})",
@@ -79,9 +79,16 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer
     }
 }
 
-pub fn interpret<W: Write>(input: &str, writer: &mut W) {
+// @param reset_db: If true, clears the database before interpreting the input
+pub fn interpret<W: Write>(input: &str, writer: &mut W, reset_db: Option<bool>) {
+    let reset_db = reset_db.unwrap_or(false);
     let mut db_guard = get_db_instance().lock().unwrap();
     let db = db_guard.get_db_mut();
+    if reset_db {
+        db.clear();
+        // Reinitialize the database instance by replacing it with a new one
+        let _ = DB_INSTANCE.set(Mutex::new(DatabaseInstance::new()));
+    }
 
     match parse_datalog(input) {
         Ok((_, items)) => {

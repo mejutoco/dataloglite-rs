@@ -44,8 +44,7 @@ fn test_empty_input() {
 
 #[test]
 fn test_example_comments() {
-    let input = fs::read_to_string("test_examples/parser/comments.datalog")
-        .expect("Failed to read test file");
+    let input = include_str!("../test_examples/parser/comments.datalog");
     let (remaining, relations) = parse_datalog(&input).expect("Failed to parse");
 
     assert_eq!(remaining, "");
@@ -54,8 +53,7 @@ fn test_example_comments() {
 
 #[test]
 fn test_cousins_facts_rules() {
-    let input = fs::read_to_string("test_examples/parser/cousins_facts_rules.datalog")
-        .expect("Failed to read test file");
+    let input = include_str!("../test_examples/parser/cousins_facts_rules.datalog");
     let (remaining, items) = parse_datalog(&input).expect("Failed to parse");
 
     assert_eq!(remaining, "");
@@ -104,11 +102,10 @@ fn test_cousins_facts_rules() {
 
 #[test]
 fn test_query_relation() {
-    let input = fs::read_to_string("test_examples/queries/basic_relation.datalog")
-        .expect("Failed to read test file");
+    let input = include_str!("../test_examples/queries/basic_relation.datalog");
 
     let mut buffer = Vec::new();
-    interpret(&input, &mut buffer);
+    interpret(&input, &mut buffer, Some(true));
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
@@ -122,12 +119,10 @@ fn test_query_relation() {
 
 #[test]
 fn test_query_variable_based_relation_second_is_var() {
-    let input =
-        fs::read_to_string("test_examples/queries/variable_based_query_second_is_var.datalog")
-            .expect("Failed to read test file");
+    let input = include_str!("../test_examples/queries/variable_based_query_second_is_var.datalog");
 
     let mut buffer = Vec::new();
-    interpret(&input, &mut buffer);
+    interpret(&input, &mut buffer, Some(true));
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
@@ -140,12 +135,10 @@ fn test_query_variable_based_relation_second_is_var() {
 
 #[test]
 fn test_query_variable_based_relation_first_is_var() {
-    let input =
-        fs::read_to_string("test_examples/queries/variable_based_query_first_is_var.datalog")
-            .expect("Failed to read test file");
+    let input = include_str!("../test_examples/queries/variable_based_query_first_is_var.datalog");
 
     let mut buffer = Vec::new();
-    interpret(&input, &mut buffer);
+    interpret(&input, &mut buffer, Some(true));
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
@@ -158,11 +151,10 @@ fn test_query_variable_based_relation_first_is_var() {
 
 #[test]
 fn test_query_fact() {
-    let input = fs::read_to_string("test_examples/queries/basic_fact.datalog")
-        .expect("Failed to read test file");
+    let input = include_str!("../test_examples/queries/basic_fact.datalog");
 
     let mut buffer = Vec::new();
-    interpret(&input, &mut buffer);
+    interpret(&input, &mut buffer, Some(true));
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
@@ -176,12 +168,11 @@ fn test_query_fact() {
 }
 
 #[test]
-fn test_query_basic_projection() {
-    let input = fs::read_to_string("test_examples/queries/basic_projection.datalog")
-        .expect("Failed to read test file");
+fn test_query_basic_projection_relation() {
+    let input = include_str!("../test_examples/queries/basic_projection_relation.datalog");
 
     let mut buffer = Vec::new();
-    interpret(&input, &mut buffer);
+    interpret(&input, &mut buffer, Some(true));
     let output = String::from_utf8(buffer).expect("Failed to convert output to string");
 
     let expected_output = indoc! {"
