@@ -130,28 +130,88 @@ impl Database {
     // And query
     pub fn query_conjunctive(&self, q: ConjunctiveQuery) -> Vec<String> {
         print!("Parsed items: {:#?}", q);
-        let mut results = Vec::new();
-        // we keep here results that might match
-        // and progressively filter them with each condition
+        // Filter many conditions by intersecting sets with previously matched
         // ?parent(X, Y), male(X).
-        let mut maybe_matches = HashSet::new();
-        for item in q.definition.data {
+        // For now we assume X is always the one we look for,
+        // and Y is just there to illustrate.
+        // TODO: challenge this assumption if it makes sense.
+        let mut res_relations_matching = HashSet::new();
+        let mut res_facts_matching = HashSet::new();
+        let res_matches;
+
+        for item in q.data {
             match item {
-                crate::parser::NonQueryDatalogItem::Relation(rel) => {
-                    if self.contains_relation(&rel) {
-                        maybe_matches.insert((rel.first.clone(), rel.second.clone()));
+                crate::parser::QueryProjection::QueryProjectionRelation(rel) => {
+                    let _matching = self.query_projection_relation(QueryProjectionRelation {
+                        name: rel.name,
+                        first: rel.first,
+                        second: "_".to_string(),
+                    });
+                    let current_matching: HashSet<String> =
+                        _matching.into_iter().map(|s| s.clone()).collect();
+
+                    // If matching is not empty it needs to be an intersection with relations_matching (matching all conditions so far)
+                    if res_relations_matching.is_empty() {
+                        for res in current_matching {
+                            res_relations_matching.insert(res);
+                        }
+                    } else {
+                        // Filter existing matches with new ones
+                        let intersection: HashSet<_> = res_relations_matching
+                            .intersection(&current_matching)
+                            .cloned()
+                            .collect();
+                        res_relations_matching = intersection;
                     }
                 }
-                crate::parser::NonQueryDatalogItem::Fact(fact) => {
-                    if self.contains_fact(&fact) {
-                        results.push(fact.first);
+                crate::parser::QueryProjection::QueryProjectionFact(fact) => {
+                    let _matching =
+                        self.query_projection_fact(QueryProjectionFact { name: fact.name });
+                    let current_matching: HashSet<String> =
+                        _matching.into_iter().map(|s| s.clone()).collect();
+
+                    // If matching is not empty it needs to be an intersection with relations_matching (matching all conditions so far)
+                    if res_facts_matching.is_empty() {
+                        for res in current_matching {
+                            res_facts_matching.insert(res);
+                        }
+                    } else {
+                        // Filter existing matches with new ones
+                        let intersection: HashSet<_> = res_facts_matching
+                            .intersection(&current_matching)
+                            .cloned()
+                            .collect();
+                        res_facts_matching = intersection;
                     }
                 }
-                _ => continue, // Skip unsupported items
             }
         }
-        // // Sort alphabetically by the 'second' field of the relation
-        // results.sort_by(|a, b| a.second.cmp(&b.second));
+
+        let empty_relations = res_relations_matching.is_empty();
+        let empty_facts = res_facts_matching.is_empty();
+        match (empty_relations, empty_facts) {
+            (true, true) => {
+                // If both are empty, we return an empty result
+                return Vec::new();
+            }
+            (true, false) => {
+                // If relations are empty, we return facts
+                res_matches = res_facts_matching;
+            }
+            (false, true) => {
+                // If facts are empty, we return relations
+                res_matches = res_relations_matching;
+            }
+            (false, false) => {
+                // If both are not empty, we need to find common elements
+                res_matches = res_relations_matching
+                    .intersection(&res_facts_matching)
+                    .cloned()
+                    .collect();
+            }
+        }
+        let mut results: Vec<String> = res_matches.into_iter().collect();
+        results.sort_by(|a, b| a.cmp(&b));
         return results;
     }
 

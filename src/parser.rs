@@ -22,6 +22,7 @@ pub enum DatalogItem {
     Query(Query),
 }
 
+// TODO: review enum
 #[derive(Debug)]
 pub enum NonQueryDatalogItem {
     Fact(Fact),
@@ -38,12 +39,9 @@ pub struct Query {
     pub data: NonQueryDatalogItem,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 pub struct ConjunctiveQuery {
-    pub name: String,
-    pub first: String,
-    pub second: String,
-    pub definition: ConjunctiveQueryDefinition,
+    pub data: Vec<QueryProjection>,
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
@@ -51,6 +49,12 @@ pub struct Relation {
     pub name: String,
     pub first: String,
     pub second: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Hash)]
+pub enum QueryProjection {
+    QueryProjectionRelation(QueryProjectionRelation),
+    QueryProjectionFact(QueryProjectionFact),
 }
 
 #[derive(Debug, Eq, PartialEq, Hash)]
@@ -81,11 +85,6 @@ pub struct VariableBasedRelationFirstIsVar {
 pub struct VariableBasedRelationSecondIsVar {
     pub name: String,
     pub first: String,
-}
-
-#[derive(Debug)]
-pub struct ConjunctiveQueryDefinition {
-    pub data: Vec<NonQueryDatalogItem>,
 }
 
 #[derive(Debug)]
@@ -269,16 +268,18 @@ pub fn parse_query(input: &str) -> IResult<&str, Query> {
         ),
         map(parse_fact, NonQueryDatalogItem::Fact),
         map(
-            parse_conjunctive_query,
-            NonQueryDatalogItem::ConjunctiveQuery,
-        ),
-        map(
             parse_variable_based_relation,
             NonQueryDatalogItem::VariableBasedRelation,
         ),
         // order is important
         // after parse_variable_based_relation
         map(parse_relation, NonQueryDatalogItem::Relation),
+        // conjunctive query after relation
+        // they look very similar
+        map(
+            parse_conjunctive_query,
+            NonQueryDatalogItem::ConjunctiveQuery,
+        ),
     ))
     .parse(input)?;
 
@@ -295,7 +296,7 @@ pub fn parse_fact(input: &str) -> IResult<&str, Fact> {
     Ok((input, Fact { name, first }))
 }
 
-pub fn parse_relation_or_fact(input: &str) -> IResult<&str, DatalogItem> {
+pub fn parse_relation_or_fact_with_vars(input: &str) -> IResult<&str, DatalogItem> {
     alt((
         map(parse_relation_with_vars, DatalogItem::Relation),
         map(parse_fact_with_var, DatalogItem::Fact),
@@ -334,8 +335,11 @@ pub fn parse_fact_with_var(input: &str) -> IResult<&str, Fact> {
 }
 
 pub fn parse_rule_definition(input: &str) -> IResult<&str, RuleDefinition> {
-    let (input, relations) =
-        separated_list1(terminated(char(','), space0), parse_relation_or_fact).parse(input)?;
+    let (input, relations) = separated_list1(
+        terminated(char(','), space0),
+        parse_relation_or_fact_with_vars,
+    )
+    .parse(input)?;
 
     Ok((input, RuleDefinition { relations }))
 }
@@ -363,27 +367,33 @@ pub fn parse_rule(input: &str) -> IResult<&str, Rule> {
 }
 
 pub fn parse_conjunctive_query(input: &str) -> IResult<&str, ConjunctiveQuery> {
-    let (input, name) = parse_rule(input)?;
-    Ok((
-        input,
-        ConjunctiveQuery {
-            name: name.name,
-            first: name.first,
-            second: name.second,
-            definition: ConjunctiveQueryDefinition {
-                data: name
-                    .definition
-                    .relations
-                    .into_iter()
-                    .map(|item| match item {
-                        DatalogItem::Fact(fact) => NonQueryDatalogItem::Fact(fact),
-                        DatalogItem::Relation(rel) => NonQueryDatalogItem::Relation(rel),
-                        _ => panic!("Unexpected item in conjunctive query definition"),
-                    })
-                    .collect(),
-            },
-        },
-    ))
+    print!("Parsing conjunctive query: {}", input);
+    let (input, data) = separated_list1(
+        terminated(char(','), space0),
+        parse_relation_or_fact_with_vars,
+    )
+    .parse(input)?;
+
+    let (input, _) = char('.')(input)?;
+
+    let mut new_data = Vec::new();
+    for item in data {
+        if let DatalogItem::Fact(fact) = &item {
+            new_data.push(QueryProjection::QueryProjectionFact(QueryProjectionFact {
+                name: fact.name.clone(),
+            }));
+        } else if let DatalogItem::Relation(rel) = &item {
+            new_data.push(QueryProjection::QueryProjectionRelation(
+                QueryProjectionRelation {
+                    name: rel.name.clone(),
+                    first: rel.first.clone(),
+                    second: rel.second.clone(),
+                },
+            ));
+        }
+    }
+
+    Ok((input, ConjunctiveQuery { data: new_data }))
 }
 
 pub fn parse_datalog_item(input: &str) -> IResult<&str, DatalogItem> {
