@@ -3,6 +3,7 @@ use crate::api::DatabaseInstance;
 use crate::parser::parse_datalog;
 use crate::parser::DatalogItem;
 use crate::parser::NonQueryDatalogItem;
+use crate::parser::QueryProjection;
 use crate::parser::VariableBasedRelation;
 use itertools::Itertools;
 use std::io::Write;
@@ -34,7 +35,21 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer
         }
         NonQueryDatalogItem::ConjunctiveQuery(query) => {
             // writeln!(writer, "Query: {}", query.data).unwrap();
-            writeln!(writer, "Query: ConjunctiveQuery TODO").unwrap();
+            let mut text = String::new();
+            for el in &query.data {
+                match el {
+                    QueryProjection::QueryProjectionFact(q) => {
+                        // hardcode X as only possibility
+                        // if we change the parser to allow more variables,
+                        // we will need to change
+                        text.push_str(&format!("\n    {}(X)", q.name));
+                    }
+                    QueryProjection::QueryProjectionRelation(q) => {
+                        text.push_str(&format!("\n    {}({}, {})", q.name, q.first, q.second));
+                    }
+                }
+            }
+            writeln!(writer, "Query: list all where:{}", text).unwrap();
             let results = db.query_conjunctive(query);
             writeln!(writer, "{}", results.iter().map(|r| r).format(", ")).unwrap();
         }
