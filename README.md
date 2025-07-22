@@ -1,4 +1,4 @@
-# Dataloglite
+# Dataloglite-rs
 
 This is an implementation (in progress) of a the declarative logic programming language [Datalog](https://en.wikipedia.org/wiki/Datalog). A powerful alternative to SQL.
 
