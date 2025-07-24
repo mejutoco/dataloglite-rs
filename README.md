@@ -111,3 +111,5 @@ Coverage report will be at tarpaulin-report.html
       - right side (rule definitions)
         - maybe each in newline
 - create a linter
+
+[![Unit Tests](https://github.com/mejutoco/dataloglite-rs/workflows/Run%20Unit%20Tests/badge.svg)](https://github.com/mejutoco/dataloglite-rs/actions)
