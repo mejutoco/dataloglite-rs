@@ -1,0 +1,9 @@
+sibling("A", "B").
+sibling("B", "C").
+sibling("C", "D").
+// siblings is "bidirectional"
+sibling("D", "C").
+sibling("C", "B").
+sibling("B", "A").
+// answer
+?sibling(X, "D").

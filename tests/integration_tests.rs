@@ -150,6 +150,24 @@ fn test_query_variable_based_relation_first_is_var() {
 }
 
 #[test]
+#[ignore = "Skipping: not implemented yet"]
+fn test_query_rescursive_siblings_first_is_var() {
+    let input = include_str!("../test_examples/queries/recursive_siblings_first_is_var.datalog");
+
+    let mut buffer = Vec::new();
+    interpret(&input, &mut buffer, Some(true));
+    let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+
+    let expected_output = indoc! {"
+        sibling is A of B
+        sibling is B of C
+        sibling is C of D
+        Query: Who is sibling of D?
+        A, B, C"};
+    assert_eq!(output.trim(), expected_output)
+}
+
+#[test]
 fn test_query_fact() {
     let input = include_str!("../test_examples/queries/basic_fact.datalog");
 
