@@ -74,6 +74,7 @@ pub fn execute_query<W: Write>(query: NonQueryDatalogItem, db: &Database, writer
                 writeln!(writer, "false").unwrap();
             }
         }
+        // rules will create relations, so we can query those too
         NonQueryDatalogItem::VariableBasedRelation(item) => match item {
             VariableBasedRelation::VariableBasedRelationFirstIsVar(rel) => {
                 writeln!(writer, "Query: Who is {} of {}?", rel.name, rel.second).unwrap();
@@ -134,10 +135,35 @@ pub fn interpret<W: Write>(input: &str, writer: &mut W, reset_db: Option<bool>) 
                         DatalogItem::Rule(rule) => {
                             writeln!(
                                 writer,
-                                "{} of {}, {} means TODO",
-                                rule.name, rule.first, rule.second
+                                "{} of {}, {} means {}",
+                                rule.name,
+                                rule.first,
+                                rule.second,
+                                rule.definition
+                                    .relations
+                                    .iter()
+                                    .map(|r| {
+                                        match r {
+                                            DatalogItem::Relation(rel) => {
+                                                format!(
+                                                    "{}({}, {})",
+                                                    rel.name, rel.first, rel.second
+                                                )
+                                            }
+                                            DatalogItem::Fact(fact) => {
+                                                format!("{}({})", fact.name, fact.first)
+                                            }
+                                            _ => String::new(), // Ignore for now
+                                        }
+                                    })
+                                    .format(", ")
                             )
                             .unwrap();
+                            //interpreting a rule should create relations so later we can query them with query relations
+                            // only if the rule definition matches
+                            // step 1. check every part of the rule
+                            // step 2. If all match create the relation
+                            // TODO:
                         }
                         DatalogItem::Query(query) => {
                             // Use the already locked database instance

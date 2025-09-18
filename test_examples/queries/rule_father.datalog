@@ -1,0 +1,15 @@
+/* Base facts: male */
+male("Bob").
+male("Charlie").
+
+/* Base facts: Parent-Child relationships */
+parent("Alice", "Bob").
+parent("Alice", "Charlie").
+parent("Bob", "Charlie").
+parent("Bob", "Cindy").
+
+/* Rules for basic relationships */
+// X is a father of Y if X is male and parent of Y
+father(X, Y) :- parent(X, Y), male(X).
+
+?father(X, "Charlie").

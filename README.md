@@ -99,9 +99,12 @@ Coverage report will be at tarpaulin-report.html
 
 ### TODO:
 
-- Add pipeline to run tests
 - Implement more query types
+  - query rules
+    - interpreting a rule should create relations so later we can query them
+      with query relation
 - api to query as a rust library
+- export api interface as wasm
 - Fuzz testing
 - create a formatter
   - canonical order for

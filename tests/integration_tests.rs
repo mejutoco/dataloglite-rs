@@ -119,7 +119,9 @@ fn test_query_relation() {
 
 #[test]
 fn test_query_variable_based_relation_second_is_var() {
-    let input = include_str!("../test_examples/queries/variable_based_query_second_is_var.datalog");
+    let input = include_str!(
+        "../test_examples/queries/variable_based_relation_query_second_is_var.datalog"
+    );
 
     let mut buffer = Vec::new();
     interpret(&input, &mut buffer, Some(true));
@@ -135,7 +137,8 @@ fn test_query_variable_based_relation_second_is_var() {
 
 #[test]
 fn test_query_variable_based_relation_first_is_var() {
-    let input = include_str!("../test_examples/queries/variable_based_query_first_is_var.datalog");
+    let input =
+        include_str!("../test_examples/queries/variable_based_relation_query_first_is_var.datalog");
 
     let mut buffer = Vec::new();
     interpret(&input, &mut buffer, Some(true));
@@ -151,8 +154,10 @@ fn test_query_variable_based_relation_first_is_var() {
 
 #[test]
 #[ignore = "Skipping: not implemented yet"]
-fn test_query_rescursive_siblings_first_is_var() {
-    let input = include_str!("../test_examples/queries/recursive_siblings_first_is_var.datalog");
+fn test_query_recursive_siblings_first_is_var() {
+    let input = include_str!(
+        "../test_examples/queries/relation_query_recursive_siblings_first_is_var.datalog"
+    );
 
     let mut buffer = Vec::new();
     interpret(&input, &mut buffer, Some(true));
@@ -164,6 +169,27 @@ fn test_query_rescursive_siblings_first_is_var() {
         sibling is C of D
         Query: Who is sibling of D?
         A, B, C"};
+    assert_eq!(output.trim(), expected_output)
+}
+
+#[test]
+fn test_query_rule_father() {
+    let input = include_str!("../test_examples/queries/rule_father.datalog");
+
+    let mut buffer = Vec::new();
+    interpret(&input, &mut buffer, Some(true));
+    let output = String::from_utf8(buffer).expect("Failed to convert output to string");
+
+    let expected_output = indoc! {"
+        male is Bob
+        male is Charlie
+        parent is Alice of Bob
+        parent is Alice of Charlie
+        parent is Bob of Charlie
+        parent is Bob of Cindy
+        father of X, Y means parent(X, Y), male(X)
+        Query: Who is father of Charlie?"};
+    // TODO: answer query
     assert_eq!(output.trim(), expected_output)
 }
 

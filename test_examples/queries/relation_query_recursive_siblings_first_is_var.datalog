@@ -1,0 +1,10 @@
+//facts
+sibling("A", "B").
+sibling("B", "C").
+sibling("C", "D").
+
+// rules
+sibling(X, Y) :- sibling(Y, X).
+
+// answer
+?sibling(X, "D").
